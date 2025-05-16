@@ -1,0 +1,5 @@
+[metal_machine]
+<machine_user>@<machine_ip_address>
+
+[metal_machine:vars]
+ansible_become_password=""

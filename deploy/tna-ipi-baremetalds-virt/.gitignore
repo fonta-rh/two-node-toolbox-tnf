@@ -1,0 +1,5 @@
+inventory.ini
+proxy.env
+kubeconfig
+*.pyc
+*.pyo
