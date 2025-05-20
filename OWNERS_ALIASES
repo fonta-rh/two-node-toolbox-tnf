@@ -1,0 +1,22 @@
+# See the OWNERS_ALIASES docs: https://git.k8s.io/community/contributors/guide/owners.md#owners_aliases
+
+aliases:
+  edge-enablement-approvers:
+  - jerpeter1
+  - eggfoobar
+  - jeff-roche
+  - qJkee
+  - jaypoulz
+  edge-enablement-reviewers:
+  - jerpeter1
+  - eggfoobar
+  - jeff-roche
+  - qJkee
+  - jaypoulz
+  team-dragonfly-approvers:
+  - slintes
+  - clobrano 
+  team-dragonfly-reviewers:
+  - slintes
+  - clobrano 
+

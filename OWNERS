@@ -1,0 +1,6 @@
+approvers:
+- edge-enablement-approvers
+- team-dragonfly-approvers 
+reviewers:
+- edge-enablement-reviewers
+- team-dragonfly-reviewers
