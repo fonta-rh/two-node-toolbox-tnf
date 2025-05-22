@@ -1,0 +1,6 @@
+- hosts: metal_machine
+  roles:
+    - config
+    - arbiter-dev
+  gather_facts: no
+  force_handlers: yes
