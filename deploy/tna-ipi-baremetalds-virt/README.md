@@ -15,6 +15,7 @@ To use this guide, you will need a remote machine to run the cluster on and your
 This is the machine where you run the deployment scripts, all that's needed is ansible.
 
 - Make sure you have the ansible-playbook command installed.
+- If you're missing the containers.podman collection, you can install it via: ansible-galaxy collection install containers.podman
 
 ### Remote Machine Requirements:
 
@@ -30,24 +31,33 @@ This is the target host where the cluster will be deployed.
 
 > Note: Log in to subscription manager where appropriate for some package installs.
 
+#### (Optional) Pre-configured remote host in AWS
+If you have an AWS account available, you can use the tools in [dev-env-aws-hypervisor](/deploy/dev-env-aws-hypervisor/README.md) to deploy a host that will be ready to run this installation. Ater finishing the process, running `make info` will provide the necessary instance information to edit `inventory.ini` (see below)
+
 ## 2. Deploying the Cluster
 
 The deployment process involves updating configuration files and running an Ansible playbook.
 
 ### Step 1: Update Configurations
 
-- Update `inventory.ini`: Edit this file to include the user and IP address of your remote machine.
-- Example: `ec2-user@100.100.100.100`.
+#### Inventory file
+- Copy `inventory.ini.sample` to `inventory.ini`: Edit this file to include the user and IP address of your remote machine. The ansible_ssh_extra_args are optional, but useful to keep alive the process during long installation steps
+- Example: `ec2-user@100.100.100.100 ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'`.
+
+#### Pull secret
 - Create `pull-secret.json`: Create a file named pull-secret.json in the `roles/arbiter-dev/files/` directory and paste your pull secret JSON string into it.
 - Update `config.sh`: Modify the `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE` and `OPENSHIFT_RELEASE_IMAGE` variables in this file with your desired image.
-- Example: `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-ec.5-x86_64`.
+- Example: `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64`.
+<br /> 
+  > Note: The config.sh file is passed to metal-scripts. A full list of acceptable values can be found by checking the linked config_example.sh file in the [openshift-metal3/dev-scripts/config_example.sh](https://github.com/openshift-metal3/dev-scripts/blob/master/config_example.sh) repository.
 
-- Public Key Access (Optional but Recommended): For convenience, your local public key is added to the authorized keys on the remote host.
+#### SSH access (optional)
+- Public Key Access: For convenience, your local public key is added to the authorized keys on the remote host.
 
   - This guide assumes your public key is located at `~/.ssh/id_ed25519.pub`.
     If your public key path is different, you need to update this path in the file roles/config/tasks/main.yaml.
 
-  > Note: The config.sh file is passed to metal-scripts. A full list of acceptable values can be found by checking the linked config_example.sh file in the [openshift-metal3/dev-scripts/config_example.sh](https://github.com/openshift-metal3/dev-scripts/blob/master/config_example.sh) repository.
+
 
 ### Step 2: Run Deployment
 

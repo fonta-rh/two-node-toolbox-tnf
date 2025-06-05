@@ -6,7 +6,7 @@
 - name: Get username
   command: whoami
   changed_when: false
-  become: no
+  become: false
   register: whoami
 
 - name: Configure dev-scripts
@@ -14,3 +14,12 @@
     dest: "{{dev_scripts_path}}/config_{{whoami.stdout}}.sh"
     src: "{{config_file[method]}}"
   register: dev_scripts_config
+
+- name: Install dependencies
+  ansible.builtin.dnf:
+    name: 
+    - podman
+    - runc
+    - containernetworking-plugins
+    state: present
+  become: true

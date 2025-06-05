@@ -12,5 +12,5 @@ export FEATURE_SET="TechPreviewNoUpgrade"
 # This is currently being used to avoid needing ci_token
 export OPENSHIFT_CI="true"
 
-export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-ec.5-x86_64
-export OPENSHIFT_RELEASE_IMAGE=quay.io/openshift-release-dev/ocp-release:4.19.0-ec.5-x86_64
+export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64
+export OPENSHIFT_RELEASE_IMAGE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64 
