@@ -1,0 +1,81 @@
+apiVersion: v1
+baseDomain: test.metalkube.org
+
+networking:
+  networkType: OVNKubernetes
+  machineNetwork:
+  - cidr: 192.168.111.0/24
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  serviceNetwork:
+  - 172.30.0.0/16
+metadata:
+  name: ostest
+compute:
+- name: worker
+  replicas: 0
+  architecture: amd64
+controlPlane:
+  name: master
+  replicas: 2
+  architecture: amd64
+  platform:
+    baremetal: {}
+  fencing:
+    credentials:
+    - hostname: master-0
+      address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/ad600ccb-e230-4a31-8de8-c5a19077b85c
+      username: admin
+      password: password
+    - hostname: master-1
+      address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/a1280c61-d0bc-474f-bb00-e1e4a21d4cbc
+      username: admin
+      password: password
+
+featureSet: "DevPreviewNoUpgrade"
+platform:
+  baremetal:
+
+    provisioningBridge: ostestpr
+    provisioningNetworkCIDR: 172.22.0.0/24
+    provisioningNetworkInterface: enp1s0
+    externalBridge: ostestbm
+
+    bootstrapOSImage: http://192.168.111.1/images/rhcos-9.6.20250402-0-qemu.x86_64.qcow2.gz?sha256=25c0d755d70b583b08020f00abe9f535bab39e8e2d369e4e4da6bab4bf1ed123
+
+    apiVIPs:
+    - 192.168.111.5
+    ingressVIPs:
+    - 192.168.111.4
+
+    hosts:
+      - name: ostest-master-0
+        role: master
+        bmc:
+          address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/ad600ccb-e230-4a31-8de8-c5a19077b85c
+          username: admin
+          password: password
+          disableCertificateVerification: null
+        bootMACAddress: 00:03:39:cb:79:a1
+        bootMode: UEFI
+        rootDeviceHints:
+          deviceName: "/dev/sda"
+        hardwareProfile: default
+      - name: ostest-master-1
+        role: master
+        bmc:
+          address: redfish+http://192.168.111.1:8000/redfish/v1/Systems/a1280c61-d0bc-474f-bb00-e1e4a21d4cbc
+          username: admin
+          password: password
+          disableCertificateVerification: null
+        bootMACAddress: 00:03:39:cb:79:a3
+        bootMode: UEFI
+        rootDeviceHints:
+          deviceName: "/dev/sda"
+        hardwareProfile: default
+
+
+
+pullSecret: |
+  {"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJ
