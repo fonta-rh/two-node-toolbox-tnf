@@ -1,7 +1,6 @@
 # EC2 Deploy Scripts
 These make targets will help you setup and configure an EC2 instance for development purposes.
-First, the environment of the deployment host will be setup. Then, a CloudFormation stack will be created to provide an accessible metal EC2 instance. 
-Finally, inside that instance, VMs are used to deploy a full Two-Node installation
+First, the environment of the deployment host will be setup. Then, a CloudFormation stack will be created to provide an accessible EC2 instance. 
 
 ## 1. Environment Setup
 #### AWS CLI
