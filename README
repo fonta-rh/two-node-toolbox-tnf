@@ -1,8 +1,13 @@
-This repository contains tools to deploy test/dev two-node Openshift clusters ([Two Node with Arbiter](deploy/tna-ipi-baremetalds-virt/) and Two Node with Fencing configurations) 
+## TWO-NODE TOOLBOX
+#### Introduction
+This repository contains tools to deploy testing or development two-node Openshift clusters.
 
-Both of them need expected a valid RHEL hypervisor, which will then provision all necessary VMs to create and set up the two-node cluster. 
-If you don't have one available, the [dev-env-aws-hypervisor](deploy/dev-env-aws-hypervisor/) folder provides instructions and tools to automatically create this base host in AWS.
+#### Creating a dev environment
+These tools expect a valid RHEL hypervisor to host all necessary VMs to create and set up the cluster.
+If you don't already have one available, the [dev-env-aws-hypervisor](deploy/dev-env-aws-hypervisor/) folder provides instructions and tools to automatically create this base host in AWS.
 
 Once the hypervisor is setup, you can use the [TNA](deploy/tna-ipi-baremetalds-virt/) and TNF folders to create those specific clusters within that newly provisioned host, or on your own one. 
 
-More information on two-node configurations can be found in the [docs](docs) folder
+#### Two-node available topologies
+Tools for installing a Two-node with Arbiter cluster can be found at [Two Node with Arbiter](deploy/tna-ipi-baremetalds-virt/). 
+General documentation on these specific OpenShift topoliges can be found in the [docs](docs) folder.
