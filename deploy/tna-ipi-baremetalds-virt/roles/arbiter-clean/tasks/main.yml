@@ -6,3 +6,7 @@
   make:
     chdir: "{{dev_scripts_path}}"
     target: clean
+- name: Reset dev-scripts checkout
+  command: git reset --hard origin/master
+  args:
+    chdir: "{{dev_scripts_path}}"

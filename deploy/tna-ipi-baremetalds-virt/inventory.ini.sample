@@ -1,5 +1,5 @@
 [metal_machine]
-<machine_user>@<machine_ip_address>
+<machine_user>@<machine_ip_address> ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'
 
 [metal_machine:vars]
 ansible_become_password=""
