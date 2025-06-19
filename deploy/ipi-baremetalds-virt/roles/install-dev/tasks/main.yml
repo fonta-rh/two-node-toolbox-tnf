@@ -1,4 +1,4 @@
-- import_tasks: arbiter-dev-scripts.yml
+- import_tasks: dev-scripts.yml
 - name: Check for existing kubeconfig
   stat:
     path: "{{kubeconfig_path}}"

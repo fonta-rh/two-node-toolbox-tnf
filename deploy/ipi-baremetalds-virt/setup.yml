@@ -1,0 +1,53 @@
+- hosts: metal_machine
+  gather_facts: no
+  force_handlers: yes
+
+  # --- Variable Definitions ---
+  vars:
+    # By default, run in interactive mode. Automation will override this.
+    interactive_mode: true
+
+  # --- Pre-flight Checks and Confirmation ---
+  pre_tasks:
+    # The prompt for 'mode' only runs when interactive
+    - name: Prompt for the execution mode
+      ansible.builtin.pause:
+        prompt: "Enter mode (arbiter or fencing)"
+      register: prompt_result
+      delegate_to: localhost
+      run_once: true
+      when: interactive_mode
+
+    # Default 'mode' if not interactive
+    - name: Set the mode fact
+      ansible.builtin.set_fact:
+        mode: "{{ prompt_result.user_input | default('arbiter') }}"
+
+    - name: Pre-load variables from the 'install-dev' role
+      ansible.builtin.include_vars:
+        dir: roles/install-dev/vars
+      run_once: true
+
+    - name: CONFIRMATION - Display the chosen config file
+      ansible.builtin.debug:
+        msg: "The mode is '{{ mode }}', so the selected script will be '{{ config_file.ipi }}'"
+      run_once: true
+      # Confirmation also only runs when interactive
+      when: interactive_mode
+
+    - name: Wait for user to press Enter to continue
+      ansible.builtin.pause:
+        prompt: "Please verify the information above is correct. Press Enter to proceed."
+      delegate_to: localhost
+      run_once: true
+      # Final confirmation pause also only runs when interactive
+      when: interactive_mode
+
+  roles:
+    - config
+    - install-dev
+
+  tasks:
+  - name: "Final verification message"
+    ansible.builtin.debug:
+      msg: "Installation tasks have completed for mode '{{ mode }}'."
