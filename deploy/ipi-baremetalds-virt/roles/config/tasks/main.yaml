@@ -1,8 +1,9 @@
 - name: Get username
   command: whoami
-  changed_when: false
-  become: no
   register: whoami
+- name: Enable user lingering
+  command: loginctl enable-linger {{ whoami.stdout }}
+  become: true
 - name: Install SSH key
   authorized_key:
     user: "{{whoami.stdout}}"
