@@ -30,6 +30,13 @@ The following programs must be present in your local environment
 Also:
 - .ssh/config file must exist
 
+#### Extra dependencies
+For automatic Redfish Pacemaker configuration on 4.19, you also need:
+- Python3 kubernetes library (https://pypi.org/project/kubernetes/)
+
+Additionally, if you're using Mac OS, you might not have `timeout`, so you might also need to install coreutils, for example via brew:
+`brew install coreutils`
+
 ### Preparing the instance.env
 The `instance.env.template` file has all of the required variables for the EC2 deployment, initialization, and connection. Copy the `instance.env.template` file to `instance.env` and set all the variables to the valid values for your user.
 
@@ -49,13 +56,13 @@ This will place you in a login shell for the EC2 instance.
 $ make deploy init
 ```
 ### Configuring the dev-environment
-Once the instance is created and you're in the remote environment, you can initialize it by running the `configure.sh` file in the home directory.
+Once the instance is created and you're in the remote environment, initialize it by running the `configure.sh` file in the home directory.
 ```bash
 [ec2-user@ip-x-x-x-x ~]$ ./configure.sh
 ```
-You will need to:
+You will be asked to: 
    - Set a password for pitadmin (cockpit access)
-   - Login to RHSM for dnf access
+   - Register the system using your RHSM login, for dnf access to various repositories.
 
 ### Utility commands
 Now that initialization is complete, here are some other utility commands provided for interacting with your AWS dev environment. These are run from the deployment host.

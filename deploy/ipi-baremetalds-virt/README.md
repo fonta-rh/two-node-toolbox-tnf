@@ -45,16 +45,21 @@ The deployment process involves updating configuration files and running an Ansi
 ### Step 1: Update Configurations
 
 #### Inventory file
-- Copy `inventory.ini.sample` to `inventory.ini`: Edit this file to include the user and IP address of your remote machine. The ansible_ssh_extra_args are optional, but useful to keep alive the process during long installation steps
-- Example: `ec2-user@100.100.100.100 ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'`.
+- Copy `inventory.ini.sample` to `inventory.ini`: Edit this file to include the user and IP address of your remote machine. The ansible_ssh_extra_args are optional, but useful to keep alive the process during long installation steps.  If you are using your own server, you might need to provide a sudo password in the `ansible_become_password` variable.   
+- Example: `ec2-user@100.100.100.100 ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'`. 
+
+#### Config files for dev-scripts
+- In `roles/install-dev/files/`, review `config_XXXXX_example.sh` files and copy them to `config_XXXXX.sh` as needed, removing the `_example` from the filename.
+- The config file for each topology is slightly different. Sample `config_arbiter_example.sh` and `config_fencing_example.sh` files are provided, ready to use with the AWS dev hypervisor. You can change the variables inside (see Note below), but when copying them, the expected file names are `config_arbiter.sh` and `config_fencing.sh`.
+- Unless you're using `OPENSHIFT_CI="True"` to avoid using private images, you should fill CI_TOKEN with your own token. You can get a it by logging into https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com. Start by clicking your name in the top right and clicking "copy login command." At this point, a new window will open, and you should click on "Display Token." It should now display an API token you can copy over to your profile.
+- Modify the `OPENSHIFT_RELEASE_IMAGE` variable in this file with your desired image.
+- Example: `OPENSHIFT_RELEASE_IMAGE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64`.
+<br /> 
+  > Note: The config.sh file is passed to metal-scripts. A full list of acceptable values can be found by checking the linked config_example.sh file in the [openshift-metal3/dev-scripts/config_example.sh](https://github.com/openshift-metal3/dev-scripts/blob/master/config_example.sh) repository.
 
 #### Pull secret
 - Create `pull-secret.json`: Create a file named pull-secret.json in the `roles/install-dev/files/` directory and paste your pull secret JSON string into it.
-- Review and update `config_XXXXX.sh` files: The config file for each topology is slightly different. Sample `config_arbiter.sh` and `config_fencing.sh` files are provided, ready to use with the AWS dev hypervisor. You can change the variables (see Note below), but the file names should stay as they are.
-- Modify the `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE` and `OPENSHIFT_RELEASE_IMAGE` variables in this file with your desired image.
-- Example: `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64`.
-<br /> 
-  > Note: The config.sh file is passed to metal-scripts. A full list of acceptable values can be found by checking the linked config_example.sh file in the [openshift-metal3/dev-scripts/config_example.sh](https://github.com/openshift-metal3/dev-scripts/blob/master/config_example.sh) repository.
+
 
 #### SSH access (optional)
 - Public Key Access: For convenience, your local public key is added to the authorized keys on the remote host.
@@ -68,6 +73,8 @@ The deployment process involves updating configuration files and running an Ansi
 - Execute the command ansible-playbook setup.yml -i inventory.ini to start the deployment process.
   - You will be prompted to choose the installation mode for the desired topology: arbiter or fencing, and then to confirm the config_X.sh file name. 
 - This process will take between 30 and 60 minutes, so be prepared for it to run for some time. The sample inventory.ini provided already accounts for this and provides an Ansible variable to keep the SSH connection alive. 
+Usually the longest task is `[install-dev: Start Openshift]`, which includes downloading all necessary images and provisioning the VMs and the actual OCP cluster. 
+If you want to check the progress of the installation you can review or follow the logs produced by dev-scripts on `/home/<user>/openshift-metal3/dev-scripts/logs/`.
 - Once the playbook is finished, a file named `proxy.env` will be created containing the proxy configs to connect to the cluster.
 - Source the `proxy.env` file by running `source proxy.env`.
 - After sourcing the file, you should be able to run oc get nodes to see the nodes running in your deployed cluster.
@@ -75,10 +82,27 @@ The deployment process involves updating configuration files and running an Ansi
 > Note: The proxy.env file assumes a relative path for the kubeconfig. You can move the kubeconfig file or change the path in proxy.env to an absolute path for convenience.
 
 #### Non-interactive usage
-- The topology of the cluster (installation mode) can be selected through the Ansible variable "mode"
+- The topology of the cluster (installation mode) can be selected through the Ansible variable "topology"
 - If you are running this installation non-interactively, you can set a variable to avoid all the prompts
   > Example:
- ansible-playbook setup.yml -e "mode=arbiter" -e "interactive_mode=false"
+ ansible-playbook setup.yml -e "topology=arbiter" -e "interactive_mode=false" -i inventory.ini
+
+#### Redfish Stonith Configuration
+
+For clusters using the fencing topology on OpenShift 4.19.x, automatic Redfish stonith configuration is available. This feature configures Pacemaker stonith resources using Redfish fencing for BareMetalHost resources.
+
+Redfish configuration can be applied in two ways:
+
+**Integrated Usage:**
+- When running the main deployment playbook in interactive mode with fencing topology, you will be prompted to configure Redfish stonith automatically
+- Redfish configuration runs as part of the main deployment workflow
+
+**Standalone Usage:**
+- Redfish configuration can be run independently using: `ansible-playbook redfish.yml`
+- This allows for running it separately from the main deployment or re-running it if needed
+
+For detailed configuration options, verification commands, and requirements, refer to the [Redfish role documentation](roles/redfish/README.md).
+
 
 ### Optional: Attaching Extra Disks
 
@@ -94,6 +118,12 @@ The deployment process involves updating configuration files and running an Ansi
 `...  quay.io/openshifttest/squid-proxy:multiarch  /bin/sh -c /usr/l...   Up 27 seconds external-squid ...
 `
   - If it's not running, restart it using the command `podman restart external-squid`.
+
+### Troubleshooting installation issues
+
+- A significant part of the installation time is spent downloading the necessary images. If you think the process might be stuck, you can check the /opt/dev-scripts/ironic/html/images to see if the download is progressing. 
+- Logs for dev-scripts are available in $home/openshift-metal3/dev-scripts/logs, and they will contain useful information to help with your issue
+
 
 ## 3. Cleaning Up
 
