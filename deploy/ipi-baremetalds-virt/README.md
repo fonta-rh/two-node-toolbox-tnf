@@ -74,6 +74,17 @@ The deployment process involves updating configuration files and running an Ansi
 
 > Note: The proxy.env file assumes a relative path for the kubeconfig. You can move the kubeconfig file or change the path in proxy.env to an absolute path for convenience.
 
+### Optional: Accessing the Console WebUI
+
+If you wish to reach the Console WebUI, you can use any preferred proxy extension on your browser to do so.
+
+- Using the `proxy.env` from the previous step, set the public IP address and port number in your proxy extension.
+- After the install, the `kubeadmin-password` file will be saved to be used with the default `kubeadmin` user.
+- Run `oc get routes console -n openshift-console -ojsonpath='{.spec.host}{"\n"}'` to get the Console URL, if you don't already know what it is.
+- You should be able to reach it in your browser and login as normal.
+
+> Note: remember to turn off your proxy extension after you are finished.
+
 #### Non-interactive usage
 - The topology of the cluster (installation mode) can be selected through the Ansible variable "mode"
 - If you are running this installation non-interactively, you can set a variable to avoid all the prompts
@@ -85,6 +96,53 @@ The deployment process involves updating configuration files and running an Ansi
 - If your deployment requires extra disks, make sure you have the disks on the remote host.
 - Then, use the attach-disk command to connect them to the virtual machines (VMs).
   - Example: `sudo virsh attach-disk ostest_arbiter_0 /dev/nvme2n1 vdc`.
+
+#### Pool Volumes As Disks
+
+Sometimes it is required to use a `pool volume` to be able to attach disk volumes to VMs with ROTA 0.
+Make sure the desired path on disk has enough space and follow the helper bash functions below.
+
+In order to present a disk drive as an SSD with ROTA 0 in a guest VM it is easier to create a pool and volumes
+and attach them as a disk object to a guest VM. Please use the helper scripts below to help create and attach the volumes.
+
+- First use `create_pool <pool_name> <host_storage_directory>` if one does not exist already, this will create, start, and set autostart on that pool.
+- Second use `create_volume <volume_name> <pool_name> <capacity>` to create the volume with the specified name attached to the pool that was created with a desired capacity.
+- Lastly use `attach_volume_to_vm <vm_name> <pool_name> <volume_name>` to attach the created device to the guest VM, please modify the function if the device name inside the guest VM is already taken.
+
+```bash
+# Create a pool to use if you don't already have one.
+function create_pool {
+    local pool_name=$1
+    local pool_path=$2
+    sudo virsh pool-define-as --name "${pool_name}" --type dir  --target "${pool_path}"
+    sudo virsh pool-build "${pool_name}"
+    sudo virsh pool-start "${pool_name}"
+    sudo virsh pool-autostart "${pool_name}"
+}
+
+# Create a volume in that pool.
+function create_volume {
+    local vol_name=$1
+    local pool_name=$2
+    local capacity="${3:-30G}"
+    sudo virsh vol-create-as --pool "${pool_name}" --name "${vol_name}" --capacity "${capacity}" --format qcow2
+}
+
+# Attach the volume to the VM
+function attach_volume_to_vm {
+    local vm_name=$1
+    local pool_name=$2
+    local volume_name=$3
+    local DEVICE_NAME=sdh # Change this if it's already occupied in the guest machine
+    sudo virsh attach-device "${vm_name}" /dev/stdin --persistent << EOF
+    <disk type='volume' device='disk'>
+      <driver name='qemu' type='qcow2' discard='unmap'/>
+      <source pool="${pool_name}" volume="${volume_name}"/>
+      <target dev="${DEVICE_NAME}" bus='scsi' rotation_rate='1'/>
+    </disk>
+EOF
+}
+```
 
 ### Troubleshooting Connection Issues:
 
