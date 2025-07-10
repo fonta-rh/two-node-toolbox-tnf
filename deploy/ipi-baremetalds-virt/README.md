@@ -50,7 +50,8 @@ The deployment process involves updating configuration files and running an Ansi
 
 #### Pull secret
 - Create `pull-secret.json`: Create a file named pull-secret.json in the `roles/install-dev/files/` directory and paste your pull secret JSON string into it.
-- Review and update `config_XXXXX.sh` files: The config file for each topology is slightly different. Sample `config_arbiter.sh` and `config_fencing.sh` files are provided, ready to use with the AWS dev hypervisor. You can change the variables (see Note below), but the file names should stay as they are.
+- Review `config_XXXXX_example.sh` files and copy them to `config_XXXXX.sh` as needed, removing the `_example` from the filename.
+- The config file for each topology is slightly different. Sample `config_arbiter_example.sh` and `config_fencing_example.sh` files are provided, ready to use with the AWS dev hypervisor. You can change the variables inside (see Note below), but when copying them, the expected file names are `config_arbiter.sh` and `config_fencing.sh`.
 - Modify the `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE` and `OPENSHIFT_RELEASE_IMAGE` variables in this file with your desired image.
 - Example: `OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64`.
 <br /> 
@@ -80,6 +81,23 @@ The deployment process involves updating configuration files and running an Ansi
   > Example:
  ansible-playbook setup.yml -e "mode=arbiter" -e "interactive_mode=false"
 
+#### Redfish Stonith Configuration
+
+For clusters using the fencing topology on OpenShift 4.19.x, automatic Redfish stonith configuration is available. This feature configures Pacemaker stonith resources using Redfish fencing for BareMetalHost resources.
+
+Redfish configuration can be applied in two ways:
+
+**Integrated Usage:**
+- When running the main deployment playbook in interactive mode with fencing topology, you will be prompted to configure Redfish stonith automatically
+- Redfish configuration runs as part of the main deployment workflow
+
+**Standalone Usage:**
+- Redfish configuration can be run independently using: `ansible-playbook redfish.yml`
+- This allows for running it separately from the main deployment or re-running it if needed
+
+For detailed configuration options, verification commands, and requirements, refer to the [Redfish role documentation](roles/redfish/README.md).
+
+
 ### Optional: Attaching Extra Disks
 
 - If your deployment requires extra disks, make sure you have the disks on the remote host.
@@ -94,6 +112,12 @@ The deployment process involves updating configuration files and running an Ansi
 `...  quay.io/openshifttest/squid-proxy:multiarch  /bin/sh -c /usr/l...   Up 27 seconds external-squid ...
 `
   - If it's not running, restart it using the command `podman restart external-squid`.
+
+### Troubleshooting installation issues
+
+- A significant part of the installation time is spent downloading the necessary images. If you think the process might be stuck, you can check the /opt/dev-scripts/ironic/html/images to see if the download is progressing. 
+- Logs for dev-scripts are available in $home/openshift-metal3/dev-scripts/logs, and they will contain useful information to help with your issue
+
 
 ## 3. Cleaning Up
 

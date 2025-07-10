@@ -7,6 +7,11 @@
     chdir: "{{dev_scripts_path}}"
     target: clean
 - name: Reset dev-scripts checkout
-  command: git reset --hard origin/master
+  command: git reset --hard origin/{{dev_scripts_branch}}
   args:
     chdir: "{{dev_scripts_path}}"
+- name: Remove /opt/dev-scripts directory completely
+  file:
+    path: /opt/dev-scripts
+    state: absent
+  become: true

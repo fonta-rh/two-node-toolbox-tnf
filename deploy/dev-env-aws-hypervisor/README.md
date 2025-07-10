@@ -27,6 +27,9 @@ The following programs must be present in your local environment
 - rsync
 - golang
 
+If you're using Mac OS, you might not have `timeout`, so you might also need to install coreutils, for example via brew:
+`brew install coreutils`
+
 Also:
 - .ssh/config file must exist
 
