@@ -380,7 +380,7 @@ timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}"
 
 sleep 15
 
-echo "updating sshconfig for aws-hyperviser"
-go run main.go -k aws-hyperviser -h "$HOST_PUBLIC_IP"
+echo "updating sshconfig for aws-hypervisor"
+go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
 
 scp -oStrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SHARED_DIR}/init_output.txt"
