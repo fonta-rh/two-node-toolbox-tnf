@@ -388,8 +388,8 @@ timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}"
 
 sleep 15
 
-echo "updating sshconfig for aws-hyperviser"
-go run main.go -k aws-hyperviser -h "$HOST_PUBLIC_IP"
+echo "updating sshconfig for aws-hypervisor"
+go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
 
 copy_configure_script
 set_aws_machine_hostname
