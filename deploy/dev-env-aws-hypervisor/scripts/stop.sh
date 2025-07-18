@@ -124,7 +124,7 @@ EOF
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
                         echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                         echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
-                        echo "3. Alternative delete cluster: make clean-cluster"
+                        echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
                         echo "Or you can forcibly stop the instance (cluster will be lost):"
                         echo "4. Continue with this stop operation"
@@ -141,7 +141,7 @@ EOF
                                 exit 1
                                 ;;
                             3)
-                                echo "Please run 'make clean-cluster' first, then 'make stop'"
+                                echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                                 exit 1
                                 ;;
                             4)
@@ -161,7 +161,7 @@ EOF
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
                         echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                         echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
-                        echo "3. Alternative delete cluster: make clean-cluster"
+                        echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
                         echo "Or you can forcibly stop the instance (cluster will be lost):"
                         echo "4. Continue with this stop operation"
@@ -178,7 +178,7 @@ EOF
                                 exit 1
                                 ;;
                             3)
-                                echo "Please run 'make clean-cluster' first, then 'make stop'"
+                                echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                                 exit 1
                                 ;;
                             4)
@@ -199,7 +199,7 @@ EOF
                 echo "RECOMMENDED: Preserve your cluster with one of these options:"
                 echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                 echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
-                echo "3. Alternative delete cluster: make clean-cluster"
+                echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                 echo ""
                 echo "Or you can forcibly stop the instance (cluster will be lost):"
                 echo "4. Continue with this stop operation"
@@ -218,7 +218,7 @@ EOF
                         exit 1
                         ;;
                     3)
-                        echo "Please run 'make clean-cluster' first, then 'make stop'"
+                        echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                         exit 1
                         ;;
                     4)
