@@ -36,7 +36,7 @@ This is the target host where the cluster will be deployed.
 > Note: Log in to subscription manager where appropriate for some package installs.
 
 #### (Optional) Pre-configured remote host in AWS
-If you have an AWS account available, you can use the tools in [dev-env-aws-hypervisor](/deploy/dev-env-aws-hypervisor/README.md) to deploy a host that will be ready to run this installation. Ater finishing the process, running `make info` will provide the necessary instance information to edit `inventory.ini` (see below)
+If you have an AWS account available, you can use the tools in [dev-env-aws-hypervisor](/deploy/dev-env-aws-hypervisor/README.md) to deploy a host that will be ready to run this installation. After finishing the process, running `make info` will provide the necessary instance information to edit `inventory.ini` (see below). You can also run `make help` to see all available instance management commands.
 
 ## 2. Deploying the Cluster
 
@@ -51,7 +51,7 @@ The deployment process involves updating configuration files and running an Ansi
 #### Config files for dev-scripts
 - In `roles/install-dev/files/`, review `config_XXXXX_example.sh` files and copy them to `config_XXXXX.sh` as needed, removing the `_example` from the filename.
 - The config file for each topology is slightly different. Sample `config_arbiter_example.sh` and `config_fencing_example.sh` files are provided, ready to use with the AWS dev hypervisor. You can change the variables inside (see Note below), but when copying them, the expected file names are `config_arbiter.sh` and `config_fencing.sh`.
-- Unless you're using `OPENSHIFT_CI="True"` to avoid using private images, you should fill CI_TOKEN with your own token. You can get a it by logging into https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com. Start by clicking your name in the top right and clicking "copy login command." At this point, a new window will open, and you should click on "Display Token." It should now display an API token you can copy over to your profile.
+- Unless you're using `OPENSHIFT_CI="True"` to avoid using private images, you should fill CI_TOKEN with your own token. You can get it from https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com. Start by clicking your name in the top right and clicking "copy login command." At this point, a new window will open, and you should click on "Display Token." It should now display an API token you can copy over to your profile.
 - Modify the `OPENSHIFT_RELEASE_IMAGE` variable in this file with your desired image.
 - Example: `OPENSHIFT_RELEASE_IMAGE=quay.io/openshift-release-dev/ocp-release:4.19.0-rc.5-multi-x86_64`.
 <br /> 
