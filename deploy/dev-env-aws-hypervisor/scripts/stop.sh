@@ -122,7 +122,7 @@ EOF
                         echo "This instance has a running OpenShift cluster."
                         echo ""
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
-                        echo "1. Suspend the cluster VMs: make suspend-cluster"
+                        echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                         echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Alternative delete cluster: make clean-cluster"
                         echo ""
@@ -133,7 +133,7 @@ EOF
                         echo
                         case $REPLY in
                             1)
-                                echo "Please run 'make suspend-cluster' first, then 'make stop'"
+                                echo "Please run 'make shutdown-cluster' first, then 'make stop'"
                                 exit 1
                                 ;;
                             2)
@@ -159,7 +159,7 @@ EOF
                         echo "This instance may have a running OpenShift cluster."
                         echo ""
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
-                        echo "1. Suspend the cluster VMs: make suspend-cluster"
+                        echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                         echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Alternative delete cluster: make clean-cluster"
                         echo ""
@@ -170,7 +170,7 @@ EOF
                         echo
                         case $REPLY in
                             1)
-                                echo "Please run 'make suspend-cluster' first, then 'make stop'"
+                                echo "Please run 'make shutdown-cluster' first, then 'make stop'"
                                 exit 1
                                 ;;
                             2)
@@ -197,18 +197,20 @@ EOF
                 echo "This instance may have a running OpenShift cluster."
                 echo ""
                 echo "RECOMMENDED: Preserve your cluster with one of these options:"
-                echo "1. Suspend the cluster VMs: make suspend-cluster"
+                echo "1. Shutdown the cluster VMs: make shutdown-cluster"
                 echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
                 echo "3. Alternative delete cluster: make clean-cluster"
                 echo ""
                 echo "Or you can forcibly stop the instance (cluster will be lost):"
                 echo "4. Continue with this stop operation"
                 echo ""
+                echo "Note: After restarting, you can redeploy the cluster with 'make redeploy-cluster'"
+                echo ""
                 read -p "Choose an option (1-4): " -n 1 -r
                 echo
                 case $REPLY in
                     1)
-                        echo "Please run 'make suspend-cluster' first, then 'make stop'"
+                        echo "Please run 'make shutdown-cluster' first, then 'make stop'"
                         exit 1
                         ;;
                     2)
@@ -261,9 +263,9 @@ esac
 echo "Instance ${INSTANCE_ID} is now stopped."
 echo ""
 echo "IMPORTANT: If you had a running OpenShift cluster, it has been forcibly shut down."
-echo "When you restart the instance with 'make start', you'll need to:"
-echo "1. SSH to the instance: make ssh"
-echo "2. Navigate to the dev-scripts directory: cd ~/openshift-metal3/dev-scripts"
-echo "3. Recreate the cluster: make"
+echo "When you restart the instance with 'make start', you'll have these options:"
+echo "1. Start the instance: make start"
+echo "2. Start up the cluster: make startup-cluster (if cluster was properly shutdown)"
+echo "3. Redeploy the cluster: make redeploy-cluster (clean and rebuild)"
 echo ""
 echo "Note: The instance can be restarted with 'make start'." 
