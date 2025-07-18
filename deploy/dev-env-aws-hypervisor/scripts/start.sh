@@ -67,16 +67,50 @@ echo "Private IP: ${HOST_PRIVATE_IP}"
 echo "Updating SSH config for aws-hypervisor..."
 go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
 
+# Check and restart the proxy container for immediate proxy capabilities
+echo "Checking proxy container status..."
+set +e  # Allow commands to fail for proxy container checks
+ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
+    echo "Checking external-squid proxy container..."
+    
+    # Check if the container exists and get its status
+    CONTAINER_STATUS=$(podman ps -a --filter name=external-squid --format "{{.Status}}" 2>/dev/null || echo "not found")
+    
+    if [[ "${CONTAINER_STATUS}" == "not found" ]]; then
+        echo "Proxy container not found - may not be deployed yet"
+    elif [[ "${CONTAINER_STATUS}" =~ ^Up ]]; then
+        echo "Proxy container is already running: ${CONTAINER_STATUS}"
+    else
+        echo "Proxy container exists but not running: ${CONTAINER_STATUS}"
+        echo "Attempting to restart proxy container..."
+        podman restart external-squid && echo "Proxy container restarted successfully" || echo "Failed to restart proxy container"
+    fi
+    
+    # Give a moment for the container to start
+    sleep 5
+    
+    # Final status check
+    FINAL_STATUS=$(podman ps --filter name=external-squid --format "{{.Status}}" 2>/dev/null || echo "not running")
+    if [[ "${FINAL_STATUS}" =~ ^Up ]]; then
+        echo "Proxy container is now running and ready for use"
+    else
+        echo "Warning: Proxy container may not be running properly"
+    fi
+EOF
+set -e  # Re-enable exit on error
+
 echo "Instance started successfully!"
 echo ""
 echo "IMPORTANT: OpenShift cluster recovery options:"
 echo ""
-echo "If you previously suspended your cluster:"
-echo "1. Resume the suspended cluster: make resume-cluster"
+echo "If you previously shutdown your cluster:"
+echo "1. Start up the cluster: make startup-cluster"
 echo ""
 echo "If you previously deleted the cluster or need to create a new one:"
-echo "1. Clean any remaining state: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
-echo "2. Deploy a new cluster: ansible-playbook setup.yml -i inventory.ini"
+echo "1. Clean and redeploy: make redeploy-cluster"
+echo "   OR"
+echo "2. Manual approach: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
+echo "3. Then deploy: ansible-playbook setup.yml -i inventory.ini"
 echo ""
 echo "For a fresh deployment, use the two-node-toolbox deployment tools:"
 echo "1. Navigate to the deployment directory: cd ../ipi-baremetalds-virt"
