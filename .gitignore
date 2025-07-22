@@ -1,0 +1,2 @@
+deploy/ipi-baremetalds-virt/roles/install-dev/files/config_arbiter.sh
+deploy/ipi-baremetalds-virt/roles/install-dev/files/config_fencing.sh
