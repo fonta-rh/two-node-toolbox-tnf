@@ -141,13 +141,11 @@ ssh -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}
     echo ""
     echo "You can check the cluster status as usual, depending on your setup."
     echo "It might take a few minutes for the cluster to be fully ready."
-    echo "If you need to redeploy the cluster, use the following command:"
-    echo "make redeploy-cluster"
     
     # Clean up the cluster VMs list
     rm -f ~/cluster-vms.txt
 EOF
 
-echo "OpenShift cluster VMs startup completed!"
-echo "The cluster VMs should be running and the proxy container should be available."
-echo "Check the cluster status as indicated above." 
+echo ""
+echo "OpenShift cluster startup completed successfully!"
+echo "If you need to redeploy the cluster, use: make redeploy-cluster" 
