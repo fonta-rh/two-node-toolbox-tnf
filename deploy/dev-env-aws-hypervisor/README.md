@@ -49,11 +49,11 @@ source ./instance.env
 ## 2. Instance Deployment
 
 ### Running the Makefile
-The Makefile is set to deploy the instance and the init function will copy over your dependencies before ssh-ing into the target machine.
+The Makefile is set to create the instance, initialize it, and update the inventory in one command.
 This will place you in a login shell for the EC2 instance.
 ```bash
-# Deploy an EC2 instance and initialize it
-$ make deploy init
+# Create, initialize, and update inventory for a new EC2 instance
+$ make deploy
 ```
 ### Configuring the dev-environment
 Once the instance is created and you're in the remote environment, initialize it by running the `configure.sh` file in the home directory.
@@ -74,8 +74,10 @@ $ make help
 ```
 
 Available commands:
-- `make deploy` - Deploy new EC2 instance
+- `make deploy` - Create, initialize, and update inventory for new EC2 instance
+- `make create` - Create new EC2 instance
 - `make init` - Initialize deployed instance
+- `make inventory` - Update inventory.ini with current instance IP
 - `make start` - Start stopped EC2 instance
 - `make stop` - Stop running EC2 instance (with interactive cluster handling)
 - `make destroy` - Completely destroy EC2 instance and all resources

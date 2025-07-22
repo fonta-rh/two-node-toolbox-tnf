@@ -1,5 +1,8 @@
+create:
+	@./scripts/create.sh
+
 deploy:
-	@./scripts/deploy.sh
+	@$(MAKE) create init inventory
 
 init:
 	@./scripts/init.sh
@@ -28,9 +31,13 @@ ssh:
 info:
 	@./scripts/print_instance_data.sh
 
+inventory:
+	@./scripts/inventory.sh
+
 help:
 	@echo "Available commands:"
-	@echo "  deploy               - Deploy new EC2 instance"
+	@echo "  deploy               - Create, initialize, and update inventory for new EC2 instance"
+	@echo "  create               - Create new EC2 instance"
 	@echo "  init                 - Initialize deployed instance"
 	@echo "  start                - Start stopped EC2 instance"
 	@echo "  stop                 - Stop running EC2 instance (interactive cluster handling)"
@@ -40,3 +47,4 @@ help:
 	@echo "  startup-cluster      - Start up OpenShift cluster VMs and proxy container"
 	@echo "  ssh                  - SSH into the EC2 instance"
 	@echo "  info                 - Display instance information"
+	@echo "  inventory            - Update inventory.ini with current instance IP"
