@@ -4,8 +4,10 @@
 
   # --- Variable Definitions ---
   vars:
-    # Variables will be set dynamically or via extra vars
-    # No hardcoded defaults that override user input
+    # By default, run in interactive mode. Automation will override this.
+    interactive_mode: true
+    # Set default installation mode for normal installations
+    install_dev_mode: 'install'
 
   # --- Pre-flight Checks and Confirmation ---
   pre_tasks:
