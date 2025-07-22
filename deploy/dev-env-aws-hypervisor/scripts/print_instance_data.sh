@@ -1,7 +1,7 @@
 #!/bin/bash
-source ./instance.env
+source ./scripts/init.sh
 
-echo "Stack: $(cat ${SHARED_DIR}/rhel_host_stack_name)"
-echo "Host: $(cat ${SHARED_DIR}/public_address)"
-echo "User: $(cat ${SHARED_DIR}/ssh_user)"
-echo "Cockpit URL: http://$(cat ${SHARED_DIR}/public_address):9090"
+msg_info "Stack: $(cat ${SHARED_DIR}/rhel_host_stack_name)"
+msg_info "Host: $(cat ${SHARED_DIR}/public_address)"
+msg_info "User: $(cat ${SHARED_DIR}/ssh_user)"
+msg_info "Cockpit URL: http://$(cat ${SHARED_DIR}/public_address):9090"

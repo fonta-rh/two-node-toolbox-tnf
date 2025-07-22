@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./instance.env
+source ./scripts/init.sh
 
 instance_ip=$(cat ${SHARED_DIR}/ssh_user)@$(cat ${SHARED_DIR}/public_address)
 

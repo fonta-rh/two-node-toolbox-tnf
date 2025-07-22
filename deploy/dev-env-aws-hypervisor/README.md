@@ -49,11 +49,11 @@ source ./instance.env
 ## 2. Instance Deployment
 
 ### Running the Makefile
-The Makefile is set to deploy the instance and the init function will copy over your dependencies before ssh-ing into the target machine.
+The Makefile is set to deploy the instance and the ssh function will ssh you into the target machine.
 This will place you in a login shell for the EC2 instance.
 ```bash
 # Deploy an EC2 instance and initialize it
-$ make deploy init
+$ make deploy ssh
 ```
 ### Configuring the dev-environment
 Once the instance is created and you're in the remote environment, initialize it by running the `configure.sh` file in the home directory.
