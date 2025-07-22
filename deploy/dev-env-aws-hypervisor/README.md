@@ -131,8 +131,9 @@ $ make redeploy-cluster
 This option:
 - Automatically cleans up the existing cluster
 - Supports interactive mode selection (arbiter or fencing)
-- Intelligently detects VM infrastructure changes
-- Rebuilds the cluster from scratch using dev-scripts make redeploy
+- Intelligently detects cluster topology changes
+- For same topology: Uses make redeploy (fast, preserves cached data)
+- For topology changes: Uses make realclean + full installation (slower but clean)
 - Integrates with Ansible playbooks for orchestration
 
 **When to use redeploy:**
@@ -189,7 +190,8 @@ $ make start
 - Integrates with `../ipi-baremetalds-virt` Ansible playbooks
 - Supports both arbiter and fencing cluster modes
 - Tracks cluster state to detect configuration changes
-- Automatically handles VM infrastructure changes when switching cluster types
+- Same topology: Fast redeploy preserves cached data
+- Topology changes: Complete rebuild (realclean + full install) ensures clean state
 
 **When to Use Each Method:**
 - **Shutdown/Startup**: For temporary shutdowns, preserving work, cost savings
