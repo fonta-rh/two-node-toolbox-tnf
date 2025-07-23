@@ -5,7 +5,7 @@ This directory contains deployment tools and scripts for setting up EC2 instance
 ## Prerequisites
 
 ### AWS CLI
-You will need to have the AWS CLI configured and the `AWS_PROFILE` environment variable set.
+If you are using the EC2 hypervisor option you will need to have the AWS CLI configured and the `AWS_PROFILE` environment variable set.
 
 For getting and configuring the CLI: https://docs.aws.amazon.com/cli/
 
@@ -58,6 +58,23 @@ $ make deploy
 
 This will create the instance, initialize it, and update the inventory in one command, placing you in a login shell for the EC2 instance.
 
+### Recommended Instance Reuse Workflow
+
+For quickly reusing an existing instance with a fresh cluster deployment:
+
+```bash
+# Force stop the instance (bypasses cluster checks)
+$ make force-stop
+
+# Start the instance
+$ make start  
+
+# Deploy a fresh cluster
+$ make redeploy-cluster
+```
+
+This sequence is the fastest way to reset and reuse an instance when cluster preservation is not needed.
+
 ### Basic Instance Operations
 ```bash
 # Create new EC2 instance
@@ -81,6 +98,9 @@ $ make start
 # Stop a running instance (with cluster management options)
 $ make stop
 
+# Force stop instance immediately (no cluster checks)
+$ make force-stop
+
 # Completely destroy the instance
 $ make destroy
 ```
@@ -94,29 +114,31 @@ When running OpenShift clusters on the instance (using dev-scripts), you have se
 - These commands automatically call the underlying setup.yml playbook with the appropriate configuration
 - Useful for automation and when you know exactly which topology you want to deploy
 
-#### Option 1: Graceful Cluster Shutdown/Startup (Not recommended due to speed)
+#### Option 1: Force Stop and Redeploy (Recommended for instance reuse)
 ```bash
-# Gracefully shutdown the cluster VMs before stopping the instance
-$ make shutdown-cluster
+# Force stop the instance immediately (no prompts, cluster will be lost)
+$ make force-stop
 
-# Stop the instance (cluster VMs are preserved in shutdown state)
-$ make stop
-
-# Start the instance again
+# Start the instance
 $ make start
 
-# Start up the cluster VMs and proxy container
-$ make startup-cluster
+# Redeploy the cluster from scratch
+$ make redeploy-cluster
+```
+
+**This is the recommended workflow for quickly reusing an instance when you don't need to preserve cluster state.**
+
+Alternative forcible stop method:
+```bash
+# Using interactive stop with forcible option
+$ make stop
+# Choose option 1 when prompted for forcible stop
 ```
 
 #### Option 2: Redeploy Cluster (Clean and Rebuild)
 ```bash
 # Redeploy the cluster (clean existing and rebuild)
 $ make redeploy-cluster
-
-# Quick deployment for specific topologies (non-interactive)
-$ make fencing-ipi    # Deploy fencing topology
-$ make arbiter-ipi    # Deploy arbiter topology
 ```
 
 This option:
@@ -129,7 +151,6 @@ This option:
 
 **When to use redeploy:**
 - When you want to refresh the cluster with the latest changes
-- After updating dev-scripts configuration
 - When the cluster is in an inconsistent state
 - For testing deployment changes
 - When switching between cluster modes (arbiter ↔ fencing)
@@ -144,51 +165,35 @@ $ make stop
 
 # When restarted, you'll need to redeploy the cluster from scratch
 $ make start
+# Quick deployment over clean server
+$ make fencing-ipi    # Deploy fencing topology
+$ make arbiter-ipi    # Deploy arbiter topology
 ```
 
-#### Option 4: Forcible Stop (Cluster Lost)
+#### Option 4: Graceful Cluster Shutdown/Startup (Not recommended due to speed and consistency)
 ```bash
-# Force stop the instance (cluster will be lost)
-$ make stop
-# Choose option 4 when prompted
+# Gracefully shutdown the cluster VMs before stopping the instance
+$ make shutdown-cluster
 
-# When restarted, you'll need to redeploy the cluster
+# Stop the instance (cluster VMs are preserved in shutdown state)
+$ make stop
+
+# Start the instance again
 $ make start
+
+# Start up the cluster VMs and proxy container
+$ make startup-cluster
 ```
 
 ## Cluster Management Details
 
 **Important: "Clean" operations delete the cluster completely. All cluster data, configurations, and workloads will be permanently lost.**
 
-**Shutdown/Startup Workflow:**
-- `make shutdown-cluster`: Gracefully shuts down all cluster VMs and saves VM list
-- `make stop`: Stops the EC2 instance safely (cluster VMs already shut down)
-- `make start`: Restarts the EC2 instance and checks proxy container status
-- `make startup-cluster`: Restarts cluster VMs using saved VM list and ensures proxy availability
-
-**Benefits:**
-- Preserves cluster state and data
-- Faster cluster recovery (no rebuild needed)
-- Maintains cluster certificates and configuration
-- Handles proxy container lifecycle automatically
-
-**Limitations:**
-- Requires proper shutdown sequence to preserve VM list
-- May need cluster health checks after startup
-- Some cluster components might need time to stabilize
-
-**Redeploy Integration:**
-- Integrates with `openshift-clusters` Ansible playbooks
-- Supports both arbiter and fencing cluster modes
-- Tracks cluster state to detect configuration changes
-- Same topology: Fast redeploy preserves cached data
-- Topology changes: Complete rebuild (realclean + full install) ensures clean state
-
 **When to Use Each Method:**
-- **Shutdown/Startup**: For temporary shutdowns, preserving work, cost savings
-- **Redeploy**: For changing configurations, updating deployments, switching cluster modes
+- **Redeploy**: For changing configurations, updating cluster deployment, switching cluster modes
 - **Delete and Clean**: For planned maintenance, manual control over cleanup
-- **Forcible Stop**: For emergency stops, when cluster is corrupted
+- **Force Stop**: For instance reuse with cluster reinstallation, when cluster is corrupted, or when cluster preservation is not needed
+- **Shutdown/Startup**: For cluster state preservation
 
 ## Interactive Stop Script
 

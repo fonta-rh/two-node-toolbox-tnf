@@ -66,7 +66,7 @@ echo "Private IP: ${HOST_PRIVATE_IP}"
 
 # Update SSH config
 echo "Updating SSH config for aws-hypervisor..."
-go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
+(cd "${SCRIPT_DIR}/.." && go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP")
 
 # Check and restart the proxy container for immediate proxy capabilities
 echo "Checking proxy container status..."
