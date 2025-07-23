@@ -1,18 +1,19 @@
 #!/bin/bash
 
-source ./instance.env
+SCRIPT_DIR=$(dirname "$0")
+source "${SCRIPT_DIR}/../instance.env"
 
 set -o nounset
 set -o errexit
 set -o pipefail
 
 # Check if the instance exists and get its ID
-if [[ ! -f "${SHARED_DIR}/aws-instance-id" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id" ]]; then
     echo "Error: No instance found. Please run 'make deploy' first."
     exit 1
 fi
 
-INSTANCE_ID=$(cat "${SHARED_DIR}/aws-instance-id")
+INSTANCE_ID=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id")
 echo "Starting instance ${INSTANCE_ID}..."
 
 # Check current instance state
@@ -56,8 +57,8 @@ esac
 HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
 HOST_PRIVATE_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
 
-echo "${HOST_PUBLIC_IP}" > "${SHARED_DIR}/public_address"
-echo "${HOST_PRIVATE_IP}" > "${SHARED_DIR}/private_address"
+echo "${HOST_PUBLIC_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/public_address"
+echo "${HOST_PRIVATE_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/private_address"
 
 echo "Instance ${INSTANCE_ID} is now running."
 echo "Public IP: ${HOST_PUBLIC_IP}"
@@ -70,7 +71,7 @@ go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
 # Check and restart the proxy container for immediate proxy capabilities
 echo "Checking proxy container status..."
 set +e  # Allow commands to fail for proxy container checks
-ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
+ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
     echo "Checking external-squid proxy container..."
     
     # Check if the container exists and get its status
@@ -108,4 +109,4 @@ echo "  - Start up the cluster: make startup-cluster"
 echo ""
 echo "If you need to deploy a new cluster:"
 echo "  - Clean and redeploy: make redeploy-cluster"
-echo "  - For manual deployment: cd ../ipi-baremetalds-virt && follow README" 
+echo "  - For manual deployment: cd ../openshift-clusters && follow README" 

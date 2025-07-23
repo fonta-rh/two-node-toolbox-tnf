@@ -1,30 +1,31 @@
 #!/bin/bash
 
-source ./instance.env
+SCRIPT_DIR=$(dirname "$0")
+source "${SCRIPT_DIR}/../instance.env"
 
 set -o nounset
 set -o errexit
 set -o pipefail
 
 # Paths
-INVENTORY_DIR="../ipi-baremetalds-virt"
+INVENTORY_DIR="${SCRIPT_DIR}/../../openshift-clusters"
 INVENTORY_FILE="${INVENTORY_DIR}/inventory.ini"
 INVENTORY_TEMPLATE="${INVENTORY_DIR}/inventory.ini.sample"
 
 # Check if instance data exists
-if [[ ! -f "${SHARED_DIR}/public_address" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/../${SHARED_DIR}/public_address" ]]; then
     echo "Error: No public address found. Please run 'make deploy' first."
     exit 1
 fi
 
-if [[ ! -f "${SHARED_DIR}/ssh_user" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user" ]]; then
     echo "Error: No ssh user found. Please run 'make deploy' first."
     exit 1
 fi
 
 # Read instance data
-PUBLIC_IP=$(cat "${SHARED_DIR}/public_address" | tr -d '\n')
-SSH_USER=$(cat "${SHARED_DIR}/ssh_user" | tr -d '\n')
+PUBLIC_IP=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/public_address" | tr -d '\n')
+SSH_USER=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user" | tr -d '\n')
 
 echo "Updating inventory with:"
 echo "  User: ${SSH_USER}"
@@ -37,8 +38,10 @@ HOST_ENTRY="${SSH_USER}@${PUBLIC_IP} ansible_ssh_extra_args='-o ServerAliveInter
 if [[ -f "${INVENTORY_FILE}" ]]; then
     echo "Updating existing inventory file..."
     
-    # Create a backup
-    cp "${INVENTORY_FILE}" "${INVENTORY_FILE}.backup.$(date +%s)"
+    # Create a backup in the inventory-backup directory
+    BACKUP_DIR="${INVENTORY_DIR}/inventory-backup"
+    mkdir -p "${BACKUP_DIR}"
+    cp "${INVENTORY_FILE}" "${BACKUP_DIR}/inventory.ini.backup.$(date +%s)"
     
     # Update the host entry in the [metal_machine] section
     # Use sed to replace the line after [metal_machine] that contains '@'

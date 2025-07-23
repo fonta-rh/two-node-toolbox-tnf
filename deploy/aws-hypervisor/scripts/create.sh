@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ./instance.env
+SCRIPT_DIR=$(dirname "$0")
+source "${SCRIPT_DIR}/../instance.env"
 
 set -o nounset
 set -o errexit
@@ -9,14 +10,14 @@ set -o pipefail
 #Save stacks events
 trap 'save_stack_events' EXIT TERM INT
 
-mkdir -p "${SHARED_DIR}"
+mkdir -p "${SCRIPT_DIR}/../${SHARED_DIR}"
 
-cf_tpl_file="${SHARED_DIR}/${STACK_NAME}-cf-tpl.yaml"
+cf_tpl_file="${SCRIPT_DIR}/../${SHARED_DIR}/${STACK_NAME}-cf-tpl.yaml"
 
 function save_stack_events()
 {
   set +o errexit
-  aws --region "${REGION}" cloudformation describe-stack-events --stack-name "${STACK_NAME}" --output json > "${SHARED_DIR}/stack-events-${STACK_NAME}.json"
+  aws --region "${REGION}" cloudformation describe-stack-events --stack-name "${STACK_NAME}" --output json > "${SCRIPT_DIR}/../${SHARED_DIR}/stack-events-${STACK_NAME}.json"
   set -o errexit
 }
 
@@ -25,7 +26,7 @@ if [[ "${RHEL_HOST_AMI}" == "" ]]; then
   exit 1
 fi
 
-echo "ec2-user" > "${SHARED_DIR}/ssh_user"
+echo "ec2-user" > "${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user"
 
 echo -e "AMI ID: $RHEL_HOST_AMI"
 echo -e "Machine Type: $EC2_INSTANCE_TYPE"
@@ -342,7 +343,7 @@ EOF
 
 
 echo -e "==== Start to create rhel host ===="
-echo "${STACK_NAME}" >> "${SHARED_DIR}/to_be_removed_cf_stack_list"
+echo "${STACK_NAME}" >> "${SCRIPT_DIR}/../${SHARED_DIR}/to_be_removed_cf_stack_list"
 aws --region "$REGION" cloudformation create-stack --stack-name "${STACK_NAME}" \
     --template-body "file://${cf_tpl_file}" \
     --capabilities CAPABILITY_NAMED_IAM \
@@ -359,12 +360,12 @@ echo "Created stack"
 echo "Waiting for stack"
 aws --region "${REGION}" cloudformation wait stack-create-complete --stack-name "${STACK_NAME}"
 
-echo "$STACK_NAME" > "${SHARED_DIR}/rhel_host_stack_name"
+echo "$STACK_NAME" > "${SCRIPT_DIR}/../${SHARED_DIR}/rhel_host_stack_name"
 # shellcheck disable=SC2016
 INSTANCE_ID="$(aws --region "${REGION}" cloudformation describe-stacks --stack-name "${STACK_NAME}" \
 --query 'Stacks[].Outputs[?OutputKey == `InstanceId`].OutputValue' --output text)"
 echo "Instance ${INSTANCE_ID}"
-echo "${INSTANCE_ID}" >> "${SHARED_DIR}/aws-instance-id"
+echo "${INSTANCE_ID}" >> "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id"
 # shellcheck disable=SC2016
 HOST_PUBLIC_IP="$(aws --region "${REGION}" cloudformation describe-stacks --stack-name "${STACK_NAME}" \
   --query 'Stacks[].Outputs[?OutputKey == `PublicIp`].OutputValue' --output text)"
@@ -372,8 +373,8 @@ HOST_PUBLIC_IP="$(aws --region "${REGION}" cloudformation describe-stacks --stac
 HOST_PRIVATE_IP="$(aws --region "${REGION}" cloudformation describe-stacks --stack-name "${STACK_NAME}" \
   --query 'Stacks[].Outputs[?OutputKey == `PrivateIp`].OutputValue' --output text)"
 
-echo "${HOST_PUBLIC_IP}" > "${SHARED_DIR}/public_address"
-echo "${HOST_PRIVATE_IP}" > "${SHARED_DIR}/private_address"
+echo "${HOST_PUBLIC_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/public_address"
+echo "${HOST_PRIVATE_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/private_address"
 
 echo "Waiting up to 10 mins for RHEL host to be up."
 timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}"
@@ -381,6 +382,6 @@ timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}"
 sleep 15
 
 echo "updating sshconfig for aws-hypervisor"
-go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
+(cd "${SCRIPT_DIR}/.." && go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP")
 
-scp -oStrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SHARED_DIR}/init_output.txt"
+scp -oStrictHostKeyChecking=no "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SCRIPT_DIR}/../${SHARED_DIR}/init_output.txt"
