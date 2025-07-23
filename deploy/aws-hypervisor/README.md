@@ -1,47 +1,19 @@
-# EC2 Deploy Scripts
-These make targets will help you setup and configure an EC2 instance for development purposes.
-First, the environment of the deployment host will be setup. Then, a CloudFormation stack will be created to provide an accessible EC2 instance. 
+# AWS Hypervisor Scripts
 
-## 1. Environment Setup
-### AWS CLI
-You will need to have the AWS CLI Configured and the `AWS_PROFILE` environment variable configured.
+This directory contains scripts for managing EC2 instances used as hypervisors for OpenShift development.
 
-For getting and configuring the CLI: https://docs.aws.amazon.com/cli/
+## Configuration
 
-You can check if you have the AWS CLI properly configured by running the following:
+### Environment Setup
+Copy the `instance.env.template` file to `instance.env` and set all variables to valid values for your user.
 
 ```bash
-$ aws configure list
-      Name                    Value             Type    Location
-      ----                    -----             ----    --------
-   profile            openshift-dev              env    ['AWS_PROFILE', 'AWS_DEFAULT_PROFILE']
-access_key     ****************4SU3 shared-credentials-file    
-secret_key     ****************z0DF shared-credentials-file    
-    region                us-east-2      config-file    ~/.aws/config
+cp instance.env.template instance.env
+# Edit instance.env with your specific values
 ```
-### Dependencies
-The following programs must be present in your local environment
-- make
-- aws
-- jq
-- rsync
-- golang
-
-Also:
-- .ssh/config file must exist
-
-#### Extra dependencies
-For automatic Redfish Pacemaker configuration on 4.19, you also need:
-- Python3 kubernetes library (https://pypi.org/project/kubernetes/)
-
-Additionally, if you're using Mac OS, you might not have `timeout`, so you might also need to install coreutils, for example via brew:
-`brew install coreutils`
-
-### Preparing the instance.env
-The `instance.env.template` file has all of the required variables for the EC2 deployment, initialization, and connection. Copy the `instance.env.template` file to `instance.env` and set all the variables to the valid values for your user.
 
 #### Automated RHSM Registration (Hands-off Deployment)
-For a completely automated deployment without manual intervention, you can configure Red Hat Subscription Manager (RHSM) activation key variables in your `instance.env` file. This enables hands-off instance deployment and configuration:
+For a completely automated deployment without manual intervention, you can configure Red Hat Subscription Manager (RHSM) activation key variables in your `instance.env` file:
 
 ```bash
 # Uncomment and set these variables for automated RHSM registration
@@ -53,264 +25,109 @@ To obtain your activation key and organization ID, refer to Red Hat documentatio
 
 When these variables are properly configured, the system will automatically register with RHSM during initialization, eliminating the need for manual registration steps.
 
-### Verifying your environment
-To verify your environment is setup properly, try sourcing the instance.env and ensure it doesn't throw errors.
+### Verifying Environment
+To verify your environment is setup properly, source the instance.env and ensure it doesn't throw errors:
 ```bash
 source ./instance.env
 ```
 
-## 2. Instance Deployment
+## Scripts
 
-### Running the Makefile
-The Makefile is set to create the instance, initialize it, and update the inventory in one command.
-This will place you in a login shell for the EC2 instance.
+### Instance Lifecycle Scripts
+
+#### `create.sh`
+Creates a new EC2 instance using CloudFormation. Reads configuration from `instance.env`.
+
 ```bash
-# Create, initialize, and update inventory for a new EC2 instance
-$ make deploy
+./scripts/create.sh
 ```
-### Configuring the dev-environment
-Once the instance is created and you're in the remote environment, initialize it by running the `configure.sh` file in the home directory.
+
+#### `init.sh`
+Initializes a deployed instance by uploading necessary files and running initial setup.
+
 ```bash
+./scripts/init.sh
+```
+
+#### `start.sh`
+Starts a stopped EC2 instance and performs necessary post-startup checks.
+
+```bash
+./scripts/start.sh
+```
+
+#### `stop.sh`
+Stops a running EC2 instance with interactive cluster management options. The script will:
+- Detect if OpenShift clusters are running
+- Offer options for graceful cluster shutdown or cleanup
+- Safely stop the instance based on user selection
+
+```bash
+./scripts/stop.sh
+```
+
+#### `destroy.sh`
+Completely destroys the EC2 instance and all associated CloudFormation resources.
+
+```bash
+./scripts/destroy.sh
+```
+
+### Utility Scripts
+
+#### `ssh.sh`
+Establishes SSH connection to the EC2 instance using the configured key and user.
+
+```bash
+./scripts/ssh.sh
+```
+
+#### `print_instance_data.sh`
+Displays current instance information including IP addresses, instance ID, and connection details.
+
+```bash
+./scripts/print_instance_data.sh
+```
+
+#### `inventory.sh`
+Updates the `../openshift-clusters/inventory.ini` file with the current instance IP address.
+
+```bash
+./scripts/inventory.sh
+```
+
+### Instance Configuration Script
+
+#### `configure.sh`
+This script is deployed to the EC2 instance during initialization and should be run after first login to complete the setup.
+
+**Location on instance:** `~/configure.sh`
+
+**Interactive Configuration:**
+If RHSM variables are not configured, you will be asked to:
+- Set a password for pitadmin (cockpit access)
+- Register the system using your RHSM login for dnf access to various repositories
+
+**Automated Configuration:**
+If you have configured the RHSM activation key variables in your `instance.env` file, the system registration will be handled automatically, requiring only the pitadmin password configuration.
+
+```bash
+# Run on the EC2 instance after first login
 [ec2-user@ip-x-x-x-x ~]$ ./configure.sh
 ```
 
-#### Interactive Configuration
-If RHSM variables are not configured, you will be asked to: 
-   - Set a password for pitadmin (cockpit access)
-   - Register the system using your RHSM login, for dnf access to various repositories
+## Script Dependencies
 
-#### Automated Configuration
-If you have configured the RHSM activation key variables in your `instance.env` file, the system registration will be handled automatically, requiring only the pitadmin password configuration.
+All scripts expect:
+- Properly configured `instance.env` file
+- AWS CLI configured with appropriate credentials
+- SSH key file accessible at the path specified in `instance.env`
 
-## 3. Instance and Cluster Management
+## Data Storage
 
-### Available Commands
-
-To see all available commands, run:
-```bash
-$ make help
-```
-
-Available commands:
-- `make deploy` - Create, initialize, and update inventory for new EC2 instance
-- `make create` - Create new EC2 instance
-- `make init` - Initialize deployed instance
-- `make inventory` - Update inventory.ini with current instance IP
-- `make start` - Start stopped EC2 instance
-- `make stop` - Stop running EC2 instance (with interactive cluster handling)
-- `make destroy` - Completely destroy EC2 instance and all resources
-- `make redeploy-cluster` - Redeploy OpenShift cluster using Ansible integration
-- `make shutdown-cluster` - Gracefully shutdown OpenShift cluster VMs
-- `make startup-cluster` - Start up OpenShift cluster VMs and proxy container
-- `make fencing-ipi` - Deploy fencing IPI cluster (non-interactive)
-- `make arbiter-ipi` - Deploy arbiter IPI cluster (non-interactive)
-- `make ssh` - SSH into the EC2 instance
-- `make info` - Display instance information
-
-### Basic Instance Operations
-```bash
-# SSH into the EC2 instance
-$ make ssh
-
-# Get instance info
-$ make info
-
-# Start a stopped instance
-$ make start
-
-# Stop a running instance (with cluster management options)
-$ make stop
-
-# Completely destroy the instance
-$ make destroy
-```
-
-### OpenShift Cluster Management
-
-When running OpenShift clusters on the instance (using dev-scripts), you have several options for managing cluster lifecycle:
-
-#### Option 1: Graceful Cluster Shutdown/Startup (Recommended)
-```bash
-# Gracefully shutdown the cluster VMs before stopping the instance
-$ make shutdown-cluster
-
-# Stop the instance (cluster VMs are preserved in shutdown state)
-$ make stop
-
-# Start the instance again
-$ make start
-
-# Start up the cluster VMs and proxy container
-$ make startup-cluster
-```
-
-#### Option 2: Redeploy Cluster (Clean and Rebuild)
-```bash
-# Redeploy the cluster (clean existing and rebuild)
-$ make redeploy-cluster
-
-# Quick deployment for specific topologies (non-interactive)
-$ make fencing-ipi    # Deploy fencing topology
-$ make arbiter-ipi    # Deploy arbiter topology
-```
-
-This option:
-- Automatically cleans up the existing cluster
-- Supports interactive mode selection (arbiter or fencing)
-- Intelligently detects cluster topology changes
-- For same topology: Uses make redeploy (fast, preserves cached data)
-- For topology changes: Uses make realclean + full installation (slower but clean)
-- Integrates with Ansible playbooks for orchestration
-
-**Quick deployment commands:**
-- `make fencing-ipi` and `make arbiter-ipi` provide non-interactive deployment for specific topologies
-- These commands automatically call the underlying setup.yml playbook with the appropriate configuration
-- Useful for automation and when you know exactly which topology you want to deploy
-
-**When to use redeploy:**
-- When you want to refresh the cluster with the latest changes
-- After updating dev-scripts configuration
-- When the cluster is in an inconsistent state
-- For testing deployment changes
-- When switching between cluster modes (arbiter ↔ fencing)
-
-#### Option 3: Delete Cluster and Clean Server
-```bash
-# Delete the cluster and clean the server using Ansible
-$ cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini
-
-# Stop the instance
-$ make stop
-
-# When restarted, you'll need to redeploy the cluster from scratch
-$ make start
-```
-
-#### Option 4: Forcible Stop (Cluster Lost)
-```bash
-# Force stop the instance (cluster will be lost)
-$ make stop
-# Choose option 4 when prompted
-
-# When restarted, you'll need to redeploy the cluster
-$ make start
-```
-
-### Cluster Management Details
-
-**Important: "Clean" operations delete the cluster completely. All cluster data, configurations, and workloads will be permanently lost.**
-
-**Shutdown/Startup Workflow:**
-- `make shutdown-cluster`: Gracefully shuts down all cluster VMs and saves VM list
-- `make stop`: Stops the EC2 instance safely (cluster VMs already shut down)
-- `make start`: Restarts the EC2 instance and checks proxy container status
-- `make startup-cluster`: Restarts cluster VMs using saved VM list and ensures proxy availability
-
-**Benefits:**
-- Preserves cluster state and data
-- Faster cluster recovery (no rebuild needed)
-- Maintains cluster certificates and configuration
-- Handles proxy container lifecycle automatically
-
-**Limitations:**
-- Requires proper shutdown sequence to preserve VM list
-- May need cluster health checks after startup
-- Some cluster components might need time to stabilize
-
-**Redeploy Integration:**
-- Integrates with `../openshift-clusters` Ansible playbooks
-- Supports both arbiter and fencing cluster modes
-- Tracks cluster state to detect configuration changes
-- Same topology: Fast redeploy preserves cached data
-- Topology changes: Complete rebuild (realclean + full install) ensures clean state
-
-**When to Use Each Method:**
-- **Shutdown/Startup**: For temporary shutdowns, preserving work, cost savings
-- **Redeploy**: For changing configurations, updating deployments, switching cluster modes
-- **Delete and Clean**: For planned maintenance, manual control over cleanup
-- **Forcible Stop**: For emergency stops, when cluster is corrupted
-
-### Interactive Stop Script
-
-When running `make stop` on an instance with a running OpenShift cluster, you'll be presented with options:
-
-1. **Shutdown the cluster VMs**: Runs `make shutdown-cluster` first (recommended)
-2. **Delete cluster and clean server**: Runs Ansible cleanup playbook
-3. **Continue with forcible stop**: Stops instance immediately (cluster lost)
-
-The script automatically detects:
-- OpenShift dev-scripts installations
-- Running cluster VMs
-- Cluster state and provides appropriate options
-
-### Instance Recovery Options
-
-After restarting an instance with `make start`, you'll see guidance for:
-
-**If you previously shutdown your cluster:**
-```bash
-# Start up the existing cluster
-$ make startup-cluster
-```
-
-**If you need to create or redeploy a cluster:**
-```bash
-# Option 1: Automated redeploy with mode selection
-$ make redeploy-cluster
-
-# Option 2: Manual Ansible approach
-$ cd ../openshift-clusters
-$ ansible-playbook clean.yml -i inventory.ini
-$ ansible-playbook setup.yml -i inventory.ini
-```
-
-### Troubleshooting Cluster Management
-
-If cluster startup fails:
-```bash
-# Check cluster status manually
-$ make ssh
-$ cd ~/openshift-metal3/dev-scripts
-$ oc --kubeconfig=ocp/<cluster-name>/auth/kubeconfig get nodes
-
-# If cluster is unrecoverable, clean and redeploy
-$ make redeploy-cluster
-```
-
-If VMs don't start properly:
-```bash
-# Check VM states manually
-$ make ssh
-$ sudo virsh list --all
-$ sudo virsh domstate <vm-name>
-
-# Manually start VMs if needed
-$ sudo virsh start <vm-name>
-```
-
-If proxy container issues occur:
-```bash
-# Check proxy container status
-$ make ssh
-$ podman ps --filter name=external-squid
-
-# Restart proxy if needed
-$ podman restart external-squid
-```
-
-### Advanced Features
-
-**Cluster State Tracking:**
-- State saved in `instance-data/cluster-vm-state.json`
-- Tracks deployment mode (arbiter/fencing)
-- Detects configuration changes for intelligent cleanup
-
-**VM Infrastructure Management:**
-- Automatic detection of VM configuration changes
-- Safe cleanup when switching between cluster types
-- Preservation of VM infrastructure when possible
-
-**Proxy Container Management:**
-- Automatic proxy container lifecycle management
-- Integration with cluster startup/shutdown workflows
-- Status checking and recovery capabilities
+Instance metadata is stored in the `instance-data/` directory:
+- `aws-instance-id`: EC2 instance ID
+- `private_address`: Instance private IP
+- `public_address`: Instance public IP
+- `ssh_user`: SSH username for the instance
+- Additional CloudFormation and configuration data
