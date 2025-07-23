@@ -45,21 +45,21 @@
 
           ============================================================
       run_once: true
-      when: interactive_mode
+      when: interactive_mode | bool
 
-    # The prompt for 'mode' only runs when interactive (script will pass mode)
-    - name: Prompt for the execution mode
+    # The prompt for 'topology' only runs when interactive (script will pass topology)
+    - name: Prompt for the execution topology
       ansible.builtin.pause:
-        prompt: "Enter mode (arbiter or fencing)"
+        prompt: "Enter topology (arbiter or fencing)"
       register: prompt_result
       delegate_to: localhost
       run_once: true
-      when: interactive_mode
+      when: interactive_mode | bool
 
-    # Set the mode fact (from prompt or passed parameter)
-    - name: Set the mode fact
+    # Set the topology fact (from prompt or passed parameter)
+    - name: Set the topology fact
       ansible.builtin.set_fact:
-        mode: "{{ prompt_result.user_input | default(mode | default('arbiter')) }}"
+        topology: "{{ prompt_result.user_input | default(topology | default('arbiter')) }}"
 
     # Show what will happen
     - name: Display redeploy plan
@@ -69,7 +69,7 @@
       vars:
         plan_text: |
           Redeploy Plan:
-          - Deployment mode: {{ mode }}
+          - Deployment topology: {{ topology }}
           - Cleanup reason: {{ cleanup_reason }}
           - VM cleanup needed: {{ vm_cleanup_needed }}
           - Clean needed: {{ clean_needed }}
@@ -102,7 +102,7 @@
           {% endif %}
       delegate_to: localhost
       run_once: true
-      when: interactive_mode
+      when: interactive_mode | bool
 
     # Complete cleanup for topology changes
     - name: Complete cleanup due to topology change (make realclean)
