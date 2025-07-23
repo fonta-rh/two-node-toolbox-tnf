@@ -5,5 +5,5 @@ config_file:
 make_target:
   ipi: "all"
 # Cluster state management variables
-cluster_state_dir: "../dev-env-aws-hypervisor/instance-data"
+cluster_state_dir: "../aws-hypervisor/instance-data"
 cluster_state_filename: "cluster-vm-state.json"

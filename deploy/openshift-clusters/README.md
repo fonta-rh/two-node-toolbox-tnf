@@ -36,7 +36,7 @@ This is the target host where the cluster will be deployed.
 > Note: Log in to subscription manager where appropriate for some package installs.
 
 #### (Optional) Pre-configured remote host in AWS
-If you have an AWS account available, you can use the tools in [dev-env-aws-hypervisor](/deploy/dev-env-aws-hypervisor/README.md) to deploy a host that will be ready to run this installation. After finishing the process, running `make info` will provide the necessary instance information to edit `inventory.ini` (see below). You can also run `make help` to see all available instance management commands.
+If you have an AWS account available, you can use the tools in [aws-hypervisor](/deploy/aws-hypervisor/README.md) to deploy a host that will be ready to run this installation. After finishing the process, running `make info` will provide the necessary instance information to edit `inventory.ini` (see below). You can also run `make help` to see all available instance management commands.
 
 ## 2. Deploying the Cluster
 
@@ -171,7 +171,7 @@ EOF
 ### Troubleshooting Connection Issues:
 
 - If you lose the ability to reach your cluster, it's likely an issue with the proxy container on the remote host.
-  - SSH into the remote host (you can run `make ssh` from the dev-env-aws-hypervisor folder).
+  - SSH into the remote host (you can run `make ssh` from the aws-hypervisor folder).
   - Validate that the external-squid pod is running `podman ps`. You should see output containing the following:
 `...  quay.io/openshifttest/squid-proxy:multiarch  /bin/sh -c /usr/l...   Up 27 seconds external-squid ...
 `

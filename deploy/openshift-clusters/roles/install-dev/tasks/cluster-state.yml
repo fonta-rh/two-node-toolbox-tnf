@@ -22,11 +22,11 @@
   copy:
     content: |
       {
-        "topology": "{{ mode }}",
+        "topology": "{{ topology }}",
         "installation_method": "IPI",
         "num_masters": 2,
         "num_workers": 0,
-        "enable_arbiter": {% if mode == "arbiter" %}"true"{% else %}""{% endif %},
+        "enable_arbiter": {% if topology == "arbiter" %}"true"{% else %}""{% endif %},
         "num_extra_workers": 0,
         "status": "deploying",
         "deployment_started_at": "{{ now(utc=True).isoformat() }}",
@@ -44,7 +44,7 @@
   debug:
     msg: |
       Cluster state updated to DEPLOYING phase:
-      - Configuration: {{ mode }} cluster (IPI installation)
+      - Configuration: {{ topology }} cluster (IPI installation)
       - Status: DEPLOYING (OpenShift installation in progress)
       - Started at: {{ now(utc=True).isoformat() }}
   run_once: true
@@ -55,11 +55,11 @@
   copy:
     content: |
       {
-        "topology": "{{ mode }}",
+        "topology": "{{ topology }}",
         "installation_method": "IPI",
         "num_masters": 2,
         "num_workers": 0,
-        "enable_arbiter": {% if mode == "arbiter" %}"true"{% else %}""{% endif %},
+        "enable_arbiter": {% if topology == "arbiter" %}"true"{% else %}""{% endif %},
         "num_extra_workers": 0,
         "status": "deployed",
         "deployment_started_at": "{{ cluster_deployment_started_at | default(now(utc=True).isoformat()) }}",
@@ -78,8 +78,8 @@
   debug:
     msg: |
       Cluster state updated after successful deployment:
-      - Configuration: {{ mode }} cluster (IPI installation)
-      - Masters: 2, Workers: 0, Arbiter: {% if mode == 'arbiter' %}enabled{% else %}disabled{% endif %}
+      - Configuration: {{ topology }} cluster (IPI installation)
+      - Masters: 2, Workers: 0, Arbiter: {% if topology == 'arbiter' %}enabled{% else %}disabled{% endif %}
       - Status: DEPLOYED (cluster successfully running)
       - Deployed at: {{ now(utc=True).isoformat() }}
   run_once: true
@@ -90,11 +90,11 @@
   copy:
     content: |
       {
-        "topology": "{{ mode }}",
+        "topology": "{{ topology }}",
         "installation_method": "IPI",
         "num_masters": 2,
         "num_workers": 0,
-        "enable_arbiter": {% if mode == "arbiter" %}"true"{% else %}""{% endif %},
+        "enable_arbiter": {% if topology == "arbiter" %}"true"{% else %}""{% endif %},
         "num_extra_workers": 0,
         "status": "deployed",
         "deployment_started_at": "{{ cluster_deployment_started_at | default(now(utc=True).isoformat()) }}",
@@ -114,8 +114,8 @@
   debug:
     msg: |
       Cluster state updated after successful redeploy:
-      - Configuration: {{ mode }} cluster (IPI installation)
-      - Masters: 2, Workers: 0, Arbiter: {% if mode == 'arbiter' %}enabled{% else %}disabled{% endif %}
+      - Configuration: {{ topology }} cluster (IPI installation)
+      - Masters: 2, Workers: 0, Arbiter: {% if topology == 'arbiter' %}enabled{% else %}disabled{% endif %}
       - Status: DEPLOYED (cluster successfully redeployed)
       - Redeployed at: {{ now(utc=True).isoformat() }}
   run_once: true

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./instance.env
+source ../../aws-hypervisor/instance.env
 
 set -o nounset
 set -o errexit
@@ -166,13 +166,13 @@ else
     echo ""
 fi
 
-# Navigate to the ipi-baremetalds-virt directory and run the redeploy playbook
+# Navigate to the openshift-clusters directory and run the redeploy playbook
 echo "Running Ansible redeploy playbook..."
-cd ../ipi-baremetalds-virt
+cd ..
 
 # Check if inventory.ini exists
 if [[ ! -f "inventory.ini" ]]; then
-    echo "Error: inventory.ini not found in ../ipi-baremetalds-virt/"
+    echo "Error: inventory.ini not found in ../"
     echo "Please ensure the inventory file is properly configured."
     exit 1
 fi

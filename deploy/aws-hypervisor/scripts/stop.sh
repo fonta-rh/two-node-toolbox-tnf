@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ./instance.env
+SCRIPT_DIR=$(dirname "$0")
+source "${SCRIPT_DIR}/../instance.env"
 
 set -o nounset
 set -o errexit
@@ -41,12 +42,12 @@ wait_for_instance_stopped() {
 }
 
 # Check if the instance exists and get its ID
-if [[ ! -f "${SHARED_DIR}/aws-instance-id" ]]; then
+if [[ ! -f "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id" ]]; then
     echo "Error: No instance found. Please run 'make deploy' first."
     exit 1
 fi
 
-INSTANCE_ID=$(cat "${SHARED_DIR}/aws-instance-id")
+INSTANCE_ID=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id")
 echo "Stopping instance ${INSTANCE_ID}..."
 
 # Check current instance state
@@ -65,7 +66,7 @@ if [[ "${INSTANCE_STATE}" == "running" ]]; then
         
         # Check if there are running dev-scripts deployments
         set +e  # Allow commands to fail
-        ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" "test -d ~/openshift-metal3" 2>/dev/null
+        ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" "test -d ~/openshift-metal3" 2>/dev/null
         DEV_SCRIPTS_EXISTS=$?
         set -e
         
@@ -74,7 +75,7 @@ if [[ "${INSTANCE_STATE}" == "running" ]]; then
             
             # Check for running VMs
             set +e  # Allow commands to fail
-            RUNNING_VMS=$(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
+            RUNNING_VMS=$(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
                 set -e
                 cd ~/openshift-metal3/dev-scripts
                 
@@ -123,7 +124,7 @@ EOF
                         echo ""
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
                         echo "1. Shutdown the cluster VMs: make shutdown-cluster"
-                        echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
+                        echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
                         echo "Or you can forcibly stop the instance (cluster will be lost):"
@@ -137,7 +138,7 @@ EOF
                                 exit 1
                                 ;;
                             2)
-                                echo "Please run 'cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
+                                echo "Please run 'cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
                                 exit 1
                                 ;;
                             3)
@@ -160,7 +161,7 @@ EOF
                         echo ""
                         echo "RECOMMENDED: Preserve your cluster with one of these options:"
                         echo "1. Shutdown the cluster VMs: make shutdown-cluster"
-                        echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
+                        echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
                         echo "Or you can forcibly stop the instance (cluster will be lost):"
@@ -174,7 +175,7 @@ EOF
                                 exit 1
                                 ;;
                             2)
-                                echo "Please run 'cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
+                                echo "Please run 'cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
                                 exit 1
                                 ;;
                             3)
@@ -198,7 +199,7 @@ EOF
                 echo ""
                 echo "RECOMMENDED: Preserve your cluster with one of these options:"
                 echo "1. Shutdown the cluster VMs: make shutdown-cluster"
-                echo "2. Delete cluster and clean server: cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini"
+                echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                 echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                 echo ""
                 echo "Or you can forcibly stop the instance (cluster will be lost):"
@@ -214,7 +215,7 @@ EOF
                         exit 1
                         ;;
                     2)
-                        echo "Please run 'cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
+                        echo "Please run 'cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini' first, then 'make stop'"
                         exit 1
                         ;;
                     3)

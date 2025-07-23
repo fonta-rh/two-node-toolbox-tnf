@@ -84,6 +84,8 @@ Available commands:
 - `make redeploy-cluster` - Redeploy OpenShift cluster using Ansible integration
 - `make shutdown-cluster` - Gracefully shutdown OpenShift cluster VMs
 - `make startup-cluster` - Start up OpenShift cluster VMs and proxy container
+- `make fencing-ipi` - Deploy fencing IPI cluster (non-interactive)
+- `make arbiter-ipi` - Deploy arbiter IPI cluster (non-interactive)
 - `make ssh` - SSH into the EC2 instance
 - `make info` - Display instance information
 
@@ -128,6 +130,10 @@ $ make startup-cluster
 ```bash
 # Redeploy the cluster (clean existing and rebuild)
 $ make redeploy-cluster
+
+# Quick deployment for specific topologies (non-interactive)
+$ make fencing-ipi    # Deploy fencing topology
+$ make arbiter-ipi    # Deploy arbiter topology
 ```
 
 This option:
@@ -137,6 +143,11 @@ This option:
 - For same topology: Uses make redeploy (fast, preserves cached data)
 - For topology changes: Uses make realclean + full installation (slower but clean)
 - Integrates with Ansible playbooks for orchestration
+
+**Quick deployment commands:**
+- `make fencing-ipi` and `make arbiter-ipi` provide non-interactive deployment for specific topologies
+- These commands automatically call the underlying setup.yml playbook with the appropriate configuration
+- Useful for automation and when you know exactly which topology you want to deploy
 
 **When to use redeploy:**
 - When you want to refresh the cluster with the latest changes
@@ -148,7 +159,7 @@ This option:
 #### Option 3: Delete Cluster and Clean Server
 ```bash
 # Delete the cluster and clean the server using Ansible
-$ cd ../ipi-baremetalds-virt && ansible-playbook clean.yml -i inventory.ini
+$ cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini
 
 # Stop the instance
 $ make stop
@@ -189,7 +200,7 @@ $ make start
 - Some cluster components might need time to stabilize
 
 **Redeploy Integration:**
-- Integrates with `../ipi-baremetalds-virt` Ansible playbooks
+- Integrates with `../openshift-clusters` Ansible playbooks
 - Supports both arbiter and fencing cluster modes
 - Tracks cluster state to detect configuration changes
 - Same topology: Fast redeploy preserves cached data
@@ -230,7 +241,7 @@ $ make startup-cluster
 $ make redeploy-cluster
 
 # Option 2: Manual Ansible approach
-$ cd ../ipi-baremetalds-virt
+$ cd ../openshift-clusters
 $ ansible-playbook clean.yml -i inventory.ini
 $ ansible-playbook setup.yml -i inventory.ini
 ```

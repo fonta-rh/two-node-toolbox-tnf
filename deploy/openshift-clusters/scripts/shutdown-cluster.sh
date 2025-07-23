@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./instance.env
+source ../../aws-hypervisor/instance.env
 
 set -o nounset
 set -o errexit
