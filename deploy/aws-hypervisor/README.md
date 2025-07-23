@@ -40,6 +40,19 @@ Additionally, if you're using Mac OS, you might not have `timeout`, so you might
 ### Preparing the instance.env
 The `instance.env.template` file has all of the required variables for the EC2 deployment, initialization, and connection. Copy the `instance.env.template` file to `instance.env` and set all the variables to the valid values for your user.
 
+#### Automated RHSM Registration (Hands-off Deployment)
+For a completely automated deployment without manual intervention, you can configure Red Hat Subscription Manager (RHSM) activation key variables in your `instance.env` file. This enables hands-off instance deployment and configuration:
+
+```bash
+# Uncomment and set these variables for automated RHSM registration
+export RHSM_ACTIVATION_KEY="your-activation-key-here"
+export RHSM_ORG="your-org-id-here"
+```
+
+To obtain your activation key and organization ID, refer to Red Hat documentation: https://access.redhat.com/solutions/3341191
+
+When these variables are properly configured, the system will automatically register with RHSM during initialization, eliminating the need for manual registration steps.
+
 ### Verifying your environment
 To verify your environment is setup properly, try sourcing the instance.env and ensure it doesn't throw errors.
 ```bash
@@ -60,9 +73,14 @@ Once the instance is created and you're in the remote environment, initialize it
 ```bash
 [ec2-user@ip-x-x-x-x ~]$ ./configure.sh
 ```
-You will be asked to: 
+
+#### Interactive Configuration
+If RHSM variables are not configured, you will be asked to: 
    - Set a password for pitadmin (cockpit access)
-   - Register the system using your RHSM login, for dnf access to various repositories.
+   - Register the system using your RHSM login, for dnf access to various repositories
+
+#### Automated Configuration
+If you have configured the RHSM activation key variables in your `instance.env` file, the system registration will be handled automatically, requiring only the pitadmin password configuration.
 
 ## 3. Instance and Cluster Management
 
