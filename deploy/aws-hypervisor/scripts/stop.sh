@@ -127,10 +127,9 @@ EOF
                         echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
-                        echo "Or you can forcibly stop the instance (cluster will be lost):"
-                        echo "4. Continue with this stop operation"
+                        echo "NOTE: To force stop the instance immediately (cluster will be lost), use: make force-stop"
                         echo ""
-                        read -p "Choose an option (1-4): " -n 1 -r
+                        read -p "Choose an option (1-3): " -n 1 -r
                         echo
                         case $REPLY in
                             1)
@@ -144,9 +143,6 @@ EOF
                             3)
                                 echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                                 exit 1
-                                ;;
-                            4)
-                                echo "Continuing with forcible instance stop..."
                                 ;;
                             *)
                                 echo "Invalid option. Operation cancelled."
@@ -164,10 +160,9 @@ EOF
                         echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                         echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                         echo ""
-                        echo "Or you can forcibly stop the instance (cluster will be lost):"
-                        echo "4. Continue with this stop operation"
+                        echo "NOTE: To force stop the instance immediately (cluster will be lost), use: make force-stop"
                         echo ""
-                        read -p "Choose an option (1-4): " -n 1 -r
+                        read -p "Choose an option (1-3): " -n 1 -r
                         echo
                         case $REPLY in
                             1)
@@ -181,9 +176,6 @@ EOF
                             3)
                                 echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                                 exit 1
-                                ;;
-                            4)
-                                echo "Continuing with forcible instance stop..."
                                 ;;
                             *)
                                 echo "Invalid option. Operation cancelled."
@@ -202,12 +194,11 @@ EOF
                 echo "2. Delete cluster and clean server: cd ../openshift-clusters && ansible-playbook clean.yml -i inventory.ini"
                 echo "3. Redeploy cluster (clean and rebuild): make redeploy-cluster"
                 echo ""
-                echo "Or you can forcibly stop the instance (cluster will be lost):"
-                echo "4. Continue with this stop operation"
+                echo "NOTE: To force stop the instance immediately (cluster will be lost), use: make force-stop"
                 echo ""
                 echo "Note: After restarting, you can redeploy the cluster with 'make redeploy-cluster'"
                 echo ""
-                read -p "Choose an option (1-4): " -n 1 -r
+                read -p "Choose an option (1-3): " -n 1 -r
                 echo
                 case $REPLY in
                     1)
@@ -221,9 +212,6 @@ EOF
                     3)
                         echo "Please run 'make redeploy-cluster' first, then 'make stop'"
                         exit 1
-                        ;;
-                    4)
-                        echo "Continuing with forcible instance stop..."
                         ;;
                     *)
                         echo "Invalid option. Operation cancelled."
