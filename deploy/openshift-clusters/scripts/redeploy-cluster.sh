@@ -1,6 +1,16 @@
 #!/bin/bash
 
-source ../../aws-hypervisor/instance.env
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_DIR="$(cd "${SCRIPT_DIR}/../../" && pwd)"
+
+# Source the instance.env file with absolute path
+source "${DEPLOY_DIR}/aws-hypervisor/instance.env"
+
+# Resolve SHARED_DIR to absolute path if it's relative
+if [[ "${SHARED_DIR}" != /* ]]; then
+    export SHARED_DIR="${DEPLOY_DIR}/aws-hypervisor/${SHARED_DIR}"
+fi
 
 set -o nounset
 set -o errexit
@@ -8,9 +18,9 @@ set -o pipefail
 
 # Function: Check if VM infrastructure needs to change and determine cleanup strategy
 check_vm_infrastructure_change() {
-    local mode="$1"
+    local topology="$1"
     local state_file="${SHARED_DIR}/cluster-vm-state.json"
-    local current_topology="$mode"
+    local current_topology="$topology"
     local current_installation_method="IPI"
     local previous_topology=""
     local previous_installation_method=""
@@ -117,7 +127,7 @@ echo "Connecting to instance at ${HOST_PUBLIC_IP}..."
 
 # Update SSH config
 echo "Updating SSH config for aws-hypervisor..."
-go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP"
+(cd "${DEPLOY_DIR}/aws-hypervisor" && go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP")
 
 # Interactive mode selection
 echo ""
@@ -127,15 +137,15 @@ echo "2) fencing"
 read -p "Enter choice (1-2): " choice
 
 case $choice in
-    1) mode="arbiter" ;;
-    2) mode="fencing" ;;
+    1) topology="arbiter" ;;
+    2) topology="fencing" ;;
     *) echo "Invalid choice"; exit 1 ;;
 esac
 
-echo "Selected mode: $mode"
+echo "Selected topology: $topology"
 
 # Check deployment requirements
-if check_vm_infrastructure_change "$mode"; then
+if check_vm_infrastructure_change "$topology"; then
     # Some form of cleanup is needed
     echo ""
     case "$cleanup_reason" in
@@ -168,11 +178,11 @@ fi
 
 # Navigate to the openshift-clusters directory and run the redeploy playbook
 echo "Running Ansible redeploy playbook..."
-cd ..
+cd "${DEPLOY_DIR}/openshift-clusters"
 
 # Check if inventory.ini exists
 if [[ ! -f "inventory.ini" ]]; then
-    echo "Error: inventory.ini not found in ../"
+    echo "Error: inventory.ini not found in ${DEPLOY_DIR}/openshift-clusters/"
     echo "Please ensure the inventory file is properly configured."
     exit 1
 fi
@@ -198,11 +208,13 @@ echo "=================================="
 
 # Call ansible in non-interactive mode with all parameters pre-determined
 ansible-playbook redeploy.yml -i inventory.ini \
-    --extra-vars "mode=${mode}" \
+    --extra-vars "topology=${topology}" \
     --extra-vars "vm_cleanup_needed=${vm_cleanup_needed}" \
     --extra-vars "clean_needed=${clean_needed:-false}" \
     --extra-vars "cleanup_reason=${cleanup_reason}" \
-    --extra-vars "interactive_mode=false"
+    --extra-vars "interactive_mode=false" \
+    --timeout=30 \
+    --forks=10
 
 echo "=================================="
 echo "OpenShift cluster redeploy completed!"

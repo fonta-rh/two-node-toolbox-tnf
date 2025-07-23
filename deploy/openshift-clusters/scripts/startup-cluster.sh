@@ -1,6 +1,16 @@
 #!/bin/bash
 
-source ../../aws-hypervisor/instance.env
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_DIR="$(cd "${SCRIPT_DIR}/../../" && pwd)"
+
+# Source the instance.env file with absolute path
+source "${DEPLOY_DIR}/aws-hypervisor/instance.env"
+
+# Resolve SHARED_DIR to absolute path if it's relative
+if [[ "${SHARED_DIR}" != /* ]]; then
+    export SHARED_DIR="${DEPLOY_DIR}/aws-hypervisor/${SHARED_DIR}"
+fi
 
 set -o nounset
 set -o errexit
