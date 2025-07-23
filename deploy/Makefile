@@ -13,6 +13,9 @@ start:
 stop:
 	@./aws-hypervisor/scripts/stop.sh
 
+force-stop:
+	@./aws-hypervisor/scripts/force-stop.sh
+
 redeploy-cluster:
 	@./openshift-clusters/scripts/redeploy-cluster.sh
 
@@ -43,7 +46,8 @@ help:
 	@echo "  create               - Create new EC2 instance"
 	@echo "  init                 - Initialize deployed instance"
 	@echo "  start                - Start stopped EC2 instance"
-	@echo "  stop                 - Stop running EC2 instance (interactive cluster handling)"
+	@echo "  stop                 - Stop running EC2 instance gracefully (interactive cluster handling)"
+	@echo "  force-stop           - Force stop EC2 instance immediately (no cluster checks)"
 	@echo "  destroy              - Completely destroy EC2 instance and all resources"
 	@echo "  redeploy-cluster     - Redeploy OpenShift cluster using dev-scripts make redeploy"
 	@echo "  shutdown-cluster     - Shutdown OpenShift cluster VMs in orderly fashion"

@@ -17,6 +17,9 @@
 
 ### New Commands
 
+- **Breaking Change**: All make commands now run from `deploy/` directory instead of `deploy/aws-hypervisor/`
+
+
 #### Instance Management
 - `make create` - Create new EC2 instance (renamed from `deploy`)
 - `make start` - Start stopped EC2 instance with cluster detection
@@ -26,7 +29,7 @@
 - `make startup-cluster` - Restore OpenShift cluster VMs and proxy services
 
 #### Workflow Scripts
-- Stop script detects running clusters and offers shutdown, cleanup, or force-stop options
+- Stop script detects running clusters and offers shutdown, cleanup, or redeploy options, with separate force-stop command
 - Cluster state tracking maintains configuration state for recovery
 - Automatic proxy container lifecycle management during cluster operations
 
@@ -37,6 +40,25 @@
 - Reorganized Makefile with comprehensive command structure and help system
 - Deployment selection between fast redeploy, clean deployment, and complete rebuild
 - Enhanced Ansible playbook integration for redeploy workflows
+
+### Documentation Restructuring
+
+- Split README documentation: makefile commands documented in `deploy/README.md`
+- AWS hypervisor scripts documented separately in `deploy/aws-hypervisor/README.md`
+
+### Migration Notes
+
+**For existing users**: Change your working directory from `deploy/aws-hypervisor/` to `deploy/` when running make commands:
+
+```bash
+# Old workflow
+cd deploy/aws-hypervisor
+make deploy
+
+# New workflow  
+cd deploy
+make deploy
+```
 
 ---
 
@@ -122,7 +144,7 @@
 
 ### Development Workflow
 
-- `make deploy` creates, initializes, and configures development environment
+- `make deploy` (run from `deploy/` directory) creates, initializes, and configures development environment
 - AWS hypervisor integration with cluster deployment tools
 - Instance start/stop for development cost control
 
