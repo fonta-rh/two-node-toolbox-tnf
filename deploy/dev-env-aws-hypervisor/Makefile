@@ -1,9 +1,6 @@
 deploy:
 	@./scripts/deploy.sh
 
-init:
-	@./scripts/init.sh
-
 destroy:
 	@./scripts/destroy.sh
 

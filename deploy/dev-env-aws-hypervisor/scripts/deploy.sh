@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./instance.env
+source ./scripts/init.sh
 
 set -o nounset
 set -o errexit
@@ -20,7 +20,16 @@ function save_stack_events()
   set -o errexit
 }
 
-if [[ "${RHEL_HOST_AMI}" == "" ]]; then
+if [[ -n "${RHEL_HOST_AMI}" && -n "${RHEL_VERSION}" ]]; then
+    echo "Warning: Both RHEL_HOST_AMI and RHEL_VERSION are set"
+    echo "⌊ Choosing RHEL_HOST_AMI=$RHEL_HOST_AMI"
+fi
+
+if [[ -z "${RHEL_HOST_AMI}" ]]; then
+    RHEL_HOST_AMI=$(get_rhel_ami)
+fi
+
+if [[ -z "${RHEL_HOST_AMI}" ]]; then
   echo "must supply an AMI to use for EC2 Instance"
   exit 1
 fi
@@ -297,7 +306,6 @@ Resources:
 
           echo "====== Authorizing public key ======" | tee -a "\$log_output_file"
           echo "\${PublicKeyString}" >> /home/ec2-user/.ssh/authorized_keys
-          echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINdwEiTCcG0kLDuuLlQ53iOBqQyHbLwy9xtfrdAJlm4D kube" >> /home/ec2-user/.ssh/authorized_keys
 
           sudo dnf install -y git make cockpit lvm2 jq |& tee -a "\$log_output_file"
           sudo systemctl enable --now cockpit.socket |& tee -a "\$log_output_file"
@@ -382,5 +390,8 @@ sleep 15
 
 echo "updating sshconfig for aws-hyperviser"
 go run main.go -k aws-hyperviser -h "$HOST_PUBLIC_IP"
+
+copy_configure_script
+set_aws_machine_hostname
 
 scp -oStrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SHARED_DIR}/init_output.txt"
