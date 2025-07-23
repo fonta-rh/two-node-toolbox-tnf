@@ -3,19 +3,49 @@
 SCRIPT_DIR=$(dirname "$0")
 source "${SCRIPT_DIR}/../instance.env"
 
-instance_ip=$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/public_address)
-host=$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)
+# Check if instance data directory exists and has the required files
+instance_data_dir="${SCRIPT_DIR}/../${SHARED_DIR}"
+public_address_file="${instance_data_dir}/public_address"
+ssh_user_file="${instance_data_dir}/ssh_user"
 
-ssh_host_ip="$host@$instance_ip"
+# Check if we have a deployed instance
+if [[ ! -f "$public_address_file" ]] || [[ ! -f "$ssh_user_file" ]]; then
+    echo "No deployed instance found (missing instance data files)."
+    echo "Checking if CloudFormation stack '${STACK_NAME}' exists..."
+    
+    # Check if the stack exists in CloudFormation
+    if aws --region $REGION cloudformation describe-stacks --stack-name "${STACK_NAME}" &>/dev/null; then
+        echo "Found CloudFormation stack '${STACK_NAME}' - proceeding with stack deletion only."
+    else
+        echo "No CloudFormation stack '${STACK_NAME}' found either."
+        echo "Nothing to destroy."
+        exit 0
+    fi
+else
+    # Instance data exists, proceed with full cleanup
+    echo "Found deployed instance, proceeding with cleanup..."
+    
+    instance_ip=$(cat "$public_address_file")
+    host=$(cat "$ssh_user_file")
+    ssh_host_ip="$host@$instance_ip"
+    
+    echo "Unregistering subscription manager on instance..."
+    ssh "$ssh_host_ip" "sudo subscription-manager unregister" || echo "Warning: Failed to unregister subscription manager (instance may be unreachable)"
+fi
 
-ssh "$ssh_host_ip" "sudo subscription-manager unregister"
-
+# Delete the CloudFormation stack
+echo "Deleting CloudFormation stack '${STACK_NAME}'..."
 aws --region $REGION cloudformation delete-stack --stack-name "${STACK_NAME}"
 
-echo "waiting for stack $STACK_NAME to be deleted"
+echo "Waiting for stack $STACK_NAME to be deleted..."
 aws --region $REGION cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}" &
 wait "$!"
 
-rm -rf "${SCRIPT_DIR}/../${SHARED_DIR:?}/"*
+# Clean up instance data directory
+if [[ -d "$instance_data_dir" ]]; then
+    echo "Cleaning up instance data..."
+    rm -rf "${instance_data_dir:?}/"*
+fi
 
-echo "deleted stack ${STACK_NAME}" > "${SCRIPT_DIR}/../${SHARED_DIR}/.done"
+echo "Stack ${STACK_NAME} has been successfully deleted." > "${instance_data_dir}/.done"
+echo "Destroy operation completed successfully."
