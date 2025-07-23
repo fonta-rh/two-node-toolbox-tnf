@@ -1,35 +1,41 @@
 create:
-	@./scripts/create.sh
+	@./aws-hypervisor/scripts/create.sh
 
 deploy:
-	@$(MAKE) create init inventory
+	@$(MAKE) create inventory
 
 destroy:
-	@./scripts/destroy.sh
+	@./aws-hypervisor/scripts/destroy.sh
 
 start:
-	@./scripts/start.sh
+	@./aws-hypervisor/scripts/start.sh
 
 stop:
-	@./scripts/stop.sh
+	@./aws-hypervisor/scripts/stop.sh
 
 redeploy-cluster:
-	@./scripts/redeploy-cluster.sh
+	@./openshift-clusters/scripts/redeploy-cluster.sh
 
 shutdown-cluster:
-	@./scripts/shutdown-cluster.sh
+	@./openshift-clusters/scripts/shutdown-cluster.sh
 
 startup-cluster:
-	@./scripts/startup-cluster.sh
+	@./openshift-clusters/scripts/startup-cluster.sh
 
 ssh:
-	@./scripts/ssh.sh
+	@./aws-hypervisor/scripts/ssh.sh
 
 info:
-	@./scripts/print_instance_data.sh
+	@./aws-hypervisor/scripts/print_instance_data.sh
 
 inventory:
-	@./scripts/inventory.sh
+	@./aws-hypervisor/scripts/inventory.sh
+
+fencing-ipi:
+	@./openshift-clusters/scripts/deploy-fencing-ipi.sh
+
+arbiter-ipi:
+	@./openshift-clusters/scripts/deploy-arbiter-ipi.sh
 
 help:
 	@echo "Available commands:"
@@ -42,6 +48,8 @@ help:
 	@echo "  redeploy-cluster     - Redeploy OpenShift cluster using dev-scripts make redeploy"
 	@echo "  shutdown-cluster     - Shutdown OpenShift cluster VMs in orderly fashion"
 	@echo "  startup-cluster      - Start up OpenShift cluster VMs and proxy container"
+	@echo "  fencing-ipi          - Deploy fencing IPI cluster (non-interactive)"
+	@echo "  arbiter-ipi          - Deploy arbiter IPI cluster (non-interactive)"
 	@echo "  ssh                  - SSH into the EC2 instance"
 	@echo "  info                 - Display instance information"
-	@echo "  inventory            - Update inventory.ini with current instance IP"
+	@echo "  inventory            - Update inventory.ini with current instance IP" 

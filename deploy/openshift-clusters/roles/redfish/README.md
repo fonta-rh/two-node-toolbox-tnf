@@ -44,7 +44,7 @@ This role is designed to run on localhost (your local machine) and uses your loc
 # Ensure you're authenticated to your OpenShift cluster
 oc whoami
 ```
-If you deployed the cluster using the procedure in [ipi-baremetalds-virt](../../README.md), you should have sourced the `proxy.env` file to have a valid connection. 
+If you deployed the cluster using the procedure in [openshift-clusters](../../README.md), you should have sourced the `proxy.env` file to have a valid connection. 
 
 Use the top-level `redfish.yml` playbook:
 

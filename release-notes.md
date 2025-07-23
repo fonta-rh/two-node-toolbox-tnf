@@ -77,7 +77,7 @@
 
 ### Project Restructuring
 
-- Moved from `tna-ipi-baremetalds-virt` to unified `ipi-baremetalds-virt` directory
+- Moved from `tna-ipi-baremetalds-virt` to unified `openshift-clusters` directory
 - Separate config files for arbiter (`config_arbiter.sh`) and fencing (`config_fencing.sh`) deployments
 - Reorganized roles for clarity and maintainability
 

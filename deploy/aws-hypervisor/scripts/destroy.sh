@@ -1,9 +1,10 @@
 #!/bin/bash
 
-source ./scripts/init.sh
+SCRIPT_DIR=$(dirname "$0")
+source "${SCRIPT_DIR}/../init.sh"
 
-instance_ip=$(cat ${SHARED_DIR}/public_address)
-host=$(cat ${SHARED_DIR}/ssh_user)
+instance_ip=$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/public_address)
+host=$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)
 
 ssh_host_ip="$host@$instance_ip"
 
@@ -15,6 +16,6 @@ echo "waiting for stack $STACK_NAME to be deleted"
 aws --region $REGION cloudformation wait stack-delete-complete --stack-name "${STACK_NAME}" &
 wait "$!"
 
-rm -rf ./${SHARED_DIR:?}/*
+rm -rf "${SCRIPT_DIR}/../${SHARED_DIR:?}/"*
 
-echo "deleted stack ${STACK_NAME}" > ${SHARED_DIR}/.done
+echo "deleted stack ${STACK_NAME}" > "${SCRIPT_DIR}/../${SHARED_DIR}/.done"
