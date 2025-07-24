@@ -187,6 +187,7 @@ EOF
 
 To shut down and clean up the deployed environment:
 
-- Run the command `ansible-playbook clean.yml -i inventory.ini`.
+- From the deploy directory, run `make clean` for standard cleanup or `make full-clean` for complete cleanup
+- Alternatively, you can run the ansible playbook directly: `ansible-playbook clean.yml -i inventory.ini`
 
 After cleaning up, you can re-create the deployment using a different payload image if desired.

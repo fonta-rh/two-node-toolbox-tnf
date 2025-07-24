@@ -157,8 +157,8 @@ This option:
 
 #### Option 3: Delete Cluster and Clean Server
 ```bash
-# Delete the cluster and clean the server using Ansible
-$ cd openshift-clusters && ansible-playbook clean.yml -i inventory.ini
+# Delete the cluster and clean the server
+$ make clean
 
 # Stop the instance
 $ make stop
@@ -188,6 +188,19 @@ $ make startup-cluster
 ## Cluster Management Details
 
 **Important: "Clean" operations delete the cluster completely. All cluster data, configurations, and workloads will be permanently lost.**
+
+### Clean Options
+```bash
+# Standard clean: Remove cluster while preserving cached data for faster redeployment
+$ make clean
+
+# Full clean: Complete cleanup including all cached data (slower but thorough)
+$ make full-clean
+```
+
+**When to Use:**
+- **`make clean`**: Standard cluster cleanup while preserving cached data for faster subsequent deployments
+- **`make full-clean`**: Complete cleanup when you want to start completely fresh or troubleshoot deployment issues
 
 **When to Use Each Method:**
 - **Redeploy**: For changing configurations, updating cluster deployment, switching cluster modes
@@ -223,10 +236,9 @@ $ make startup-cluster
 # Option 1: Automated redeploy with mode selection
 $ make redeploy-cluster
 
-# Option 2: Manual Ansible approach
-$ cd openshift-clusters
-$ ansible-playbook clean.yml -i inventory.ini
-$ ansible-playbook setup.yml -i inventory.ini
+# Option 2: Manual clean and setup approach
+$ make clean
+$ make arbiter-ipi #(for example)
 ```
 
 ## Troubleshooting Cluster Management
