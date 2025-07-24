@@ -30,7 +30,7 @@ else
     ssh_host_ip="$host@$instance_ip"
     
     echo "Unregistering subscription manager on instance..."
-    ssh "$ssh_host_ip" "sudo subscription-manager unregister" || echo "Warning: Failed to unregister subscription manager (instance may be unreachable)"
+    ssh "$ssh_host_ip" "sudo subscription-manager unregister" || echo "Warning: Failed to unregister subscription manager (instance may be unreachable or not registered)"
 fi
 
 # Delete the CloudFormation stack
