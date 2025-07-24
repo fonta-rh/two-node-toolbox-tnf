@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR=$(dirname "$0")
-source "${SCRIPT_DIR}/../instance.env"
+source "${SCRIPT_DIR}/init.sh"
 
 instance_ip=$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/public_address)
 

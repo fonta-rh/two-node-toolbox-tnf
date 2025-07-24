@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR=$(dirname "$0")
-source "${SCRIPT_DIR}/../instance.env"
+source "${SCRIPT_DIR}/common.sh"
 
 echo "Stack: $(cat ${SCRIPT_DIR}/../${SHARED_DIR}/rhel_host_stack_name)"
 echo "Host: $(cat ${SCRIPT_DIR}/../${SHARED_DIR}/public_address)"
