@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$(dirname "$0")
-source "${SCRIPT_DIR}/../init.sh"
+source "${SCRIPT_DIR}/common.sh"
 
 # Check if instance data directory exists and has the required files
 instance_data_dir="${SCRIPT_DIR}/../${SHARED_DIR}"

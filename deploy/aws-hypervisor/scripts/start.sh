@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$(dirname "$0")
-source "${SCRIPT_DIR}/../instance.env"
+source "${SCRIPT_DIR}/common.sh"
 
 set -o nounset
 set -o errexit
