@@ -79,7 +79,7 @@ If you want to check the progress of the installation you can review or follow t
 - Source the `proxy.env` file by running `source proxy.env`.
 - After sourcing the file, you should be able to run oc get nodes to see the nodes running in your deployed cluster.
 
-> Note: The proxy.env file assumes a relative path for the kubeconfig. You can move the kubeconfig file or change the path in proxy.env to an absolute path for convenience.
+> Note: The proxy.env file automatically detects its location and sets the correct absolute path for the kubeconfig, making it work from any directory where it's sourced.
 
 ### Optional: Accessing the Console WebUI
 

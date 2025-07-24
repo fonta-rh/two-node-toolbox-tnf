@@ -37,8 +37,12 @@ ansible-playbook setup.yml \
 
 if [[ $? -eq 0 ]]; then
     echo ""
+    echo "✓ OpenShift fencing cluster deployment completed successfully!"
+    echo ""
     echo "Next steps:"
-    echo "1. Source the proxy environment: source proxy.env"
+    echo "1. Source the proxy environment from anywhere:"
+    echo "   source ${DEPLOY_DIR}/openshift-clusters/proxy.env"
+    echo "   (or from openshift-clusters directory: source proxy.env)"
     echo "2. Verify cluster access: oc get nodes"
     echo "3. Access the cluster console if needed"
 else
