@@ -58,3 +58,18 @@ function get_rhel_ami() {
         echo ""
   fi
 }
+
+function copy_configure_script() {
+    local instance_ip
+    instance_ip="$(cat ${SHARED_DIR}/ssh_user)@$(cat ${SHARED_DIR}/public_address)"
+    msg_info "copying over config ${SCRIPT_DIR}/configure.sh and making it executable"
+    scp ${SCRIPT_DIR}/configure.sh $instance_ip:~/configure.sh
+    ssh $instance_ip 'chmod +x ~/configure.sh'
+}
+
+function set_aws_machine_hostname() {
+    local instance_ip
+    instance_ip="$(cat ${SHARED_DIR}/ssh_user)@$(cat ${SHARED_DIR}/public_address)"
+    msg_info "setting machine hostname to aws-${STACK_NAME}"
+    ssh $instance_ip "sudo hostnamectl set-hostname aws-${STACK_NAME}"
+}

@@ -2,7 +2,10 @@ create:
 	@./aws-hypervisor/scripts/create.sh
 
 deploy:
-	@$(MAKE) create inventory
+	@$(MAKE) create init inventory
+
+init:
+	@./aws-hypervisor/scripts/init.sh
 
 destroy:
 	@./aws-hypervisor/scripts/destroy.sh
