@@ -15,6 +15,11 @@
 - Automatic detection of cluster topology changes (Arbiter ↔ Fencing) with cleanup strategies
 - Deployment paths optimized based on cluster state and configuration changes
 
+#### Cluster Cleanup Management
+- Simplified cluster cleanup with `make clean` and `make full-clean` commands
+- Standardized cleanup interface replacing direct ansible playbook commands
+- Documentation updated to recommend make targets over manual ansible commands
+
 ### New Commands
 
 - **Breaking Change**: All make commands now run from `deploy/` directory instead of `deploy/aws-hypervisor/`
@@ -27,6 +32,10 @@
 - `make redeploy-cluster` - Cluster redeployment with mode selection
 - `make shutdown-cluster` - Graceful OpenShift cluster VM shutdown
 - `make startup-cluster` - Restore OpenShift cluster VMs and proxy services
+
+#### Cluster Cleanup Management
+- `make clean` - Standard cluster cleanup preserving cached data for faster redeployment
+- `make full-clean` - Complete cluster cleanup including all cached data for thorough reset
 
 #### Workflow Scripts
 - Stop script detects running clusters and offers shutdown, cleanup, or redeploy options, with separate force-stop command
