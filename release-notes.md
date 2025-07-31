@@ -71,6 +71,34 @@ make deploy
 
 ---
 
+## Version 0.4.1 - Resource Agents Patching Utilities
+*Release Date: July 31, 2025*
+
+### New Features
+
+#### Resource Agents Patching
+- Added helper scripts for patching resource-agents on OpenShift cluster nodes
+- Support for both shell script and Ansible playbook-based approaches
+- Automatic cluster node discovery and RPM deployment across all nodes
+
+### New Tools
+
+#### Helper Scripts
+- `helpers/resource-agents-patch.sh` - Shell script for installing RPM packages on all cluster nodes using rpm-ostree
+- `helpers/resource-agents-patch.yml` - Ansible playbook alternative for RPM installation
+
+### Documentation
+- Added `helpers/README.md` with usage instructions for both approaches
+- Sample inventory file `helpers/inventory_ocp_hosts.sample` for Ansible workflow
+
+### Technical Implementation
+- Prerequisites validation (oc and jq tools)
+- Cluster authentication verification
+- Node reboot instructions after RPM installation
+- Simplified workflow for resource agent updates on OpenShift clusters
+
+---
+
 ## Version 0.4 - Integrated Redfish Configuration  
 *Release Date: July 10, 2025*
 
