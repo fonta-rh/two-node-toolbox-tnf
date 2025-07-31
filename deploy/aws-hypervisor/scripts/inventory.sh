@@ -31,8 +31,41 @@ echo "Updating inventory with:"
 echo "  User: ${SSH_USER}"
 echo "  IP:   ${PUBLIC_IP}"
 
-# Create the host entry
-HOST_ENTRY="${SSH_USER}@${PUBLIC_IP} ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'"
+# Function to update inventory file using Python ConfigParser
+function update_config() {
+    local inventory_file="$1"
+    HOST_ENTRY="${SSH_USER}@${PUBLIC_IP} ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'"
+    
+    python3 -c "
+import configparser
+
+# ConfigParser with specific settings for Ansible inventory format
+config = configparser.ConfigParser(allow_no_value=True, delimiters=('=',))
+config.optionxform = str  # Preserve case sensitivity
+config.read('$inventory_file')
+
+# Ensure the metal_machine section exists
+if not config.has_section('metal_machine'):
+    config.add_section('metal_machine')
+
+# Remove any existing host entries (lines with @ symbol)
+items_to_remove = []
+if config.has_section('metal_machine'):
+    for item in config.options('metal_machine'):
+        if '@' in item:
+            items_to_remove.append(item)
+
+for item in items_to_remove:
+    config.remove_option('metal_machine', item)
+
+# Add the new host entry (without a value, as it's just a host declaration)
+config.set('metal_machine', '$HOST_ENTRY', None)
+
+# Write the updated config
+with open('$inventory_file', 'w') as configfile:
+    config.write(configfile, space_around_delimiters=False)
+"
+}
 
 # Check if inventory file exists
 if [[ -f "${INVENTORY_FILE}" ]]; then
@@ -43,13 +76,7 @@ if [[ -f "${INVENTORY_FILE}" ]]; then
     mkdir -p "${BACKUP_DIR}"
     cp "${INVENTORY_FILE}" "${BACKUP_DIR}/inventory.ini.backup.$(date +%s)"
     
-    # Update the host entry in the [metal_machine] section
-    # Use sed to replace the line after [metal_machine] that contains '@'
-    sed -i '/^\[metal_machine\]$/,/^\[/ {
-        /^[^[].*@.*/ c\
-'"${HOST_ENTRY}"'
-    }' "${INVENTORY_FILE}"
-    
+    update_config "${INVENTORY_FILE}"
     echo "Updated existing inventory file: ${INVENTORY_FILE}"
 else
     echo "Creating new inventory file from template..."
@@ -60,12 +87,9 @@ else
         exit 1
     fi
     
-    # Copy template and replace placeholders
+    # Copy template and update with actual values
     cp "${INVENTORY_TEMPLATE}" "${INVENTORY_FILE}"
-    
-    # Replace template placeholders
-    sed -i "s|<machine_user>@<machine_ip_address>|${HOST_ENTRY}|g" "${INVENTORY_FILE}"
-    
+    update_config "${INVENTORY_FILE}"
     echo "Created new inventory file: ${INVENTORY_FILE}"
 fi
 
