@@ -34,7 +34,7 @@ echo "  IP:   ${PUBLIC_IP}"
 # Function to update inventory file using Python ConfigParser
 function update_config() {
     local inventory_file="$1"
-    HOST_ENTRY="${SSH_USER}@${PUBLIC_IP} ansible_ssh_extra_args='-o ServerAliveInterval=30 -o ServerAliveCountMax=120'"
+    HOST_ENTRY="${SSH_USER}@${PUBLIC_IP} ansible_ssh_extra_args=\"-o ServerAliveInterval=30 -o ServerAliveCountMax=120\""
     
     python3 -c "
 import configparser
