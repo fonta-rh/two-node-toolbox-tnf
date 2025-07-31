@@ -26,7 +26,7 @@ INSTANCE_ID=$(cat "${SHARED_DIR}/aws-instance-id")
 echo "Shutting down OpenShift cluster VMs on instance ${INSTANCE_ID}..."
 
 # Check current instance state
-INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text)
+INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text --no-cli-pager)
 
 if [[ "${INSTANCE_STATE}" != "running" ]]; then
     echo "Error: Instance is not running (state: ${INSTANCE_STATE})"
@@ -35,7 +35,7 @@ if [[ "${INSTANCE_STATE}" != "running" ]]; then
 fi
 
 # Get the instance IP
-HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text --no-cli-pager)
 
 if [[ "${HOST_PUBLIC_IP}" == "null" || "${HOST_PUBLIC_IP}" == "" ]]; then
     echo "Error: Could not determine instance public IP"

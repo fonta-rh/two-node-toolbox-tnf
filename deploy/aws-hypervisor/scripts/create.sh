@@ -385,7 +385,7 @@ echo "${HOST_PUBLIC_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/public_address"
 echo "${HOST_PRIVATE_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/private_address"
 
 echo "Waiting up to 10 mins for RHEL host to be up."
-timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}"
+timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}" --no-cli-pager
 
 sleep 15
 

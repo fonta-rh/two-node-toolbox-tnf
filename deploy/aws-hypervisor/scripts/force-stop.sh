@@ -21,7 +21,7 @@ wait_for_instance_stopped() {
         echo "Attempt ${attempt}/${FORCE_STOP_WAIT_RETRIES}..."
         
         set +e  # Allow this command to fail
-        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${instance_id}"
+        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${instance_id}" --no-cli-pager
         wait_result=$?
         set -e
         
@@ -51,7 +51,7 @@ fi
 INSTANCE_ID=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id")
 
 # Get current instance state
-INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text)
+INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text --no-cli-pager)
 echo "Current instance state: ${INSTANCE_STATE}"
 
 echo "==================== FORCE STOP WARNING ===================="
@@ -73,7 +73,7 @@ case "${INSTANCE_STATE}" in
         ;;
     "running"|"stopping"|"pending")
         echo "Force stopping instance ${INSTANCE_ID}..."
-        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}" --force
+        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}" --force --no-cli-pager
         wait_for_instance_stopped "${INSTANCE_ID}" || true
         ;;
     *)
@@ -84,7 +84,7 @@ case "${INSTANCE_STATE}" in
 esac
 
 # Final state check
-FINAL_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text)
+FINAL_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text --no-cli-pager)
 echo "Final instance state: ${FINAL_STATE}"
 
 if [[ "${FINAL_STATE}" == "stopped" ]]; then

@@ -21,7 +21,7 @@ wait_for_instance_stopped() {
         echo "Attempt ${attempt}/${STOP_WAIT_RETRIES}..."
         
         set +e  # Allow this command to fail
-        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${instance_id}"
+        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${instance_id}" --no-cli-pager
         wait_result=$?
         set -e
         
@@ -51,7 +51,7 @@ INSTANCE_ID=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id")
 echo "Stopping instance ${INSTANCE_ID}..."
 
 # Check current instance state
-INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text)
+INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text --no-cli-pager)
 echo "Current instance state: ${INSTANCE_STATE}"
 
 # Check for running OpenShift clusters before stopping
@@ -59,7 +59,7 @@ if [[ "${INSTANCE_STATE}" == "running" ]]; then
     echo "Checking for running OpenShift clusters..."
     
     # Get the instance IP to check for clusters
-    HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+    HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text --no-cli-pager)
     
     if [[ "${HOST_PUBLIC_IP}" != "null" && "${HOST_PUBLIC_IP}" != "" ]]; then
         echo "Checking for OpenShift clusters on ${HOST_PUBLIC_IP}..."
@@ -229,7 +229,7 @@ case "${INSTANCE_STATE}" in
         ;;
     "running")
         echo "Stopping instance..."
-        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}" --no-cli-pager
         wait_for_instance_stopped "${INSTANCE_ID}"
         ;;
     "stopping")
@@ -238,9 +238,9 @@ case "${INSTANCE_STATE}" in
         ;;
     "pending")
         echo "Instance is starting. Waiting for it to be running first..."
-        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Now stopping instance..."
-        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 stop-instances --instance-ids "${INSTANCE_ID}" --no-cli-pager
         wait_for_instance_stopped "${INSTANCE_ID}"
         ;;
     *)

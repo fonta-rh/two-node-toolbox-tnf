@@ -17,7 +17,7 @@ INSTANCE_ID=$(cat "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id")
 echo "Starting instance ${INSTANCE_ID}..."
 
 # Check current instance state
-INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text)
+INSTANCE_STATE=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].State.Name' --output text --no-cli-pager)
 echo "Current instance state: ${INSTANCE_STATE}"
 
 case "${INSTANCE_STATE}" in
@@ -26,26 +26,27 @@ case "${INSTANCE_STATE}" in
         ;;
     "stopped")
         echo "Starting instance..."
-        aws --region "${REGION}" ec2 start-instances --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 start-instances --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Waiting for instance to start..."
-        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Waiting for instance to be ready..."
-        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}" --no-cli-pager
         ;;
     "stopping")
         echo "Instance is currently stopping. Waiting for it to stop completely..."
-        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-stopped --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Now starting instance..."
-        aws --region "${REGION}" ec2 start-instances --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 start-instances --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Waiting for instance to start..."
-        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}" --no-cli-pager
         echo "Waiting for instance to be ready..."
-        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}" --no-cli-pager
         ;;
     "pending")
         echo "Instance is already starting. Waiting for it to be ready..."
-        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}"
-        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}"
+        aws --region "${REGION}" ec2 wait instance-running --instance-ids "${INSTANCE_ID}" --no-cli-pager
+        echo "Waiting for instance to be ready..."
+        aws --region "${REGION}" ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}" --no-cli-pager
         ;;
     *)
         echo "Error: Instance is in an unexpected state: ${INSTANCE_STATE}"
@@ -54,8 +55,8 @@ case "${INSTANCE_STATE}" in
 esac
 
 # Get the current public IP (it may have changed)
-HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
-HOST_PRIVATE_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
+HOST_PUBLIC_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PublicIpAddress' --output text --no-cli-pager)
+HOST_PRIVATE_IP=$(aws --region "${REGION}" ec2 describe-instances --instance-ids "${INSTANCE_ID}" --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text --no-cli-pager)
 
 echo "${HOST_PUBLIC_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/public_address"
 echo "${HOST_PRIVATE_IP}" > "${SCRIPT_DIR}/../${SHARED_DIR}/private_address"
