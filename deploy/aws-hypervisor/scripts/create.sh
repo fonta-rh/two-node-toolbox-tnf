@@ -373,7 +373,7 @@ echo "$STACK_NAME" > "${SCRIPT_DIR}/../${SHARED_DIR}/rhel_host_stack_name"
 INSTANCE_ID="$(aws --region "${REGION}" cloudformation describe-stacks --stack-name "${STACK_NAME}" \
 --query 'Stacks[].Outputs[?OutputKey == `InstanceId`].OutputValue' --output text)"
 echo "Instance ${INSTANCE_ID}"
-echo "${INSTANCE_ID}" >> "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id"
+echo "${INSTANCE_ID}" > "${SCRIPT_DIR}/../${SHARED_DIR}/aws-instance-id"
 # shellcheck disable=SC2016
 HOST_PUBLIC_IP="$(aws --region "${REGION}" cloudformation describe-stacks --stack-name "${STACK_NAME}" \
   --query 'Stacks[].Outputs[?OutputKey == `PublicIp`].OutputValue' --output text)"
