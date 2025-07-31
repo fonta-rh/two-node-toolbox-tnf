@@ -389,6 +389,10 @@ timeout 10m aws ec2 wait instance-status-ok --instance-id "${INSTANCE_ID}" --no-
 
 sleep 15
 
+# Add the host key to known_hosts to avoid prompts while maintaining security
+echo "Adding host key for $HOST_PUBLIC_IP to known_hosts..."
+ssh-keyscan -H "$HOST_PUBLIC_IP" >> ~/.ssh/known_hosts 2>/dev/null
+
 echo "updating sshconfig for aws-hypervisor"
 (cd "${SCRIPT_DIR}/.." && go run main.go -k aws-hypervisor -h "$HOST_PUBLIC_IP")
 
