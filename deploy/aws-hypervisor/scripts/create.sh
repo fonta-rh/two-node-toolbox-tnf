@@ -395,4 +395,4 @@ echo "updating sshconfig for aws-hypervisor"
 copy_configure_script
 set_aws_machine_hostname
 
-scp -oStrictHostKeyChecking=no "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SCRIPT_DIR}/../${SHARED_DIR}/init_output.txt"
+scp "$(cat ${SCRIPT_DIR}/../${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}:/tmp/init_output.txt" "${SCRIPT_DIR}/../${SHARED_DIR}/init_output.txt"

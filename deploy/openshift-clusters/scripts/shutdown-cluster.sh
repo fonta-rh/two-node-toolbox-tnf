@@ -46,7 +46,7 @@ echo "Connecting to instance at ${HOST_PUBLIC_IP}..."
 
 # Check if dev-scripts directory exists
 set +e  # Allow commands to fail
-ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" "test -d ~/openshift-metal3" 2>/dev/null
+ssh -o ConnectTimeout=10 "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" "test -d ~/openshift-metal3" 2>/dev/null
 DEV_SCRIPTS_EXISTS=$?
 set -e
 
@@ -59,7 +59,7 @@ fi
 echo "Found dev-scripts directory. Performing orderly shutdown of cluster VMs..."
 
 # Perform orderly shutdown of the cluster VMs
-ssh -o StrictHostKeyChecking=no "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
+ssh "$(cat ${SHARED_DIR}/ssh_user)@${HOST_PUBLIC_IP}" << 'EOF'
     set -e
     cd ~/openshift-metal3/dev-scripts
     
