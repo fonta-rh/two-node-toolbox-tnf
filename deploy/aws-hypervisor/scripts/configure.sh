@@ -86,14 +86,15 @@ sudo subscription-manager repos \
 sudo rm -rf /etc/yum.repos.d.bak
 
 # Enable CodeReady Builder (CRB) repo for -devel packages (e.g. libvirt-devel).
-# On RHUI instances (like AWS), subscription-manager repos --enable doesn't work
-# for CRB because repos are managed by RHUI configuration. The 'crb' command
-# handles both RHUI and non-RHUI environments correctly.
+# On RHUI instances (like AWS), subscription-manager repos --enable can't touch
+# CRB at all (registered or not) because it's managed by the static RHUI repo
+# file, not RHSM entitlements. dnf config-manager edits that file directly,
+# which is what 'crb enable' itself wraps on non-RHUI hosts.
 enable_crb_repo() {
     if command -v crb &>/dev/null; then
         sudo crb enable
     else
-        sudo subscription-manager repos --enable "codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-$(uname -m)-rhui-rpms"
+        sudo dnf config-manager --set-enabled "codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-rhui-rpms"
     fi
 }
 
