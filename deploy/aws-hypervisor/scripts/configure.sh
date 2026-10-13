@@ -39,6 +39,7 @@ else
     echo -e "${user}\tALL=(ALL)\tNOPASSWD: ALL" | sudo tee "/etc/sudoers.d/${user}"
 fi
 
+sudo cp -a /etc/yum.repos.d /etc/yum.repos.d.bak
 sudo rm -rf /etc/yum.repos.d/*
 sudo subscription-manager config --rhsm.manage_repos=1 --rhsmcertd.disable=redhat-access-insights
 
@@ -50,6 +51,16 @@ else
     echo "No activation key found, falling back to interactive registration"
     sudo subscription-manager register
 fi
+register_status=$?
+
+if [ "$register_status" -ne 0 ]; then
+    echo "ERROR: subscription-manager register failed. Restoring pre-existing repo files."
+    sudo rm -rf /etc/yum.repos.d
+    sudo mv /etc/yum.repos.d.bak /etc/yum.repos.d
+    exit 1
+fi
+
+sudo rm -rf /etc/yum.repos.d.bak
 
 sudo subscription-manager attach --pool=8a85f99c7d76f2fd017d96c411c70667
 sudo subscription-manager repos \
