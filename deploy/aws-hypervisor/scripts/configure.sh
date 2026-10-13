@@ -65,7 +65,7 @@ enable_crb_repo() {
     if command -v crb &>/dev/null; then
         sudo crb enable
     else
-        sudo subscription-manager repos --enable "codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-$(uname -m)-rpms"
+        sudo subscription-manager repos --enable "codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-$(uname -m)-rhui-rpms"
     fi
 }
 
