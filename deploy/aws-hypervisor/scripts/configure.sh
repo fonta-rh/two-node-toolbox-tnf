@@ -57,10 +57,14 @@ else
     if sudo test -d /etc/yum.repos.d.bak; then
         echo "Reusing pre-existing backup from an interrupted prior run."
     else
-        if ! sudo cp -a /etc/yum.repos.d /etc/yum.repos.d.bak; then
+        staging=/etc/yum.repos.d.bak.partial
+        sudo rm -rf "${staging}"
+        if ! sudo cp -a /etc/yum.repos.d "${staging}"; then
             echo "ERROR: Failed to back up /etc/yum.repos.d. Aborting before wipe."
+            sudo rm -rf "${staging}"
             exit 1
         fi
+        sudo mv "${staging}" /etc/yum.repos.d.bak
         sudo rm -rf /etc/yum.repos.d/*
     fi
 
@@ -79,7 +83,7 @@ fi
 sudo subscription-manager config --rhsm.manage_repos=1 --rhsmcertd.disable=redhat-access-insights
 
 sudo subscription-manager attach --pool=8a85f99c7d76f2fd017d96c411c70667 \
-    || restore_repos_and_exit "subscription-manager attach failed"
+    || echo "WARNING: subscription-manager attach failed or is unsupported (e.g. RHEL 10); continuing — required repos are validated below."
 
 sudo subscription-manager repos \
 --enable "rhel-${RHEL_MAJOR_VERSION}-for-$(uname -m)-appstream-rpms" \
@@ -88,20 +92,33 @@ sudo subscription-manager repos \
     || restore_repos_and_exit "subscription-manager repos --enable failed"
 
 if sudo test -d /etc/yum.repos.d.bak; then
-    sudo cp -an /etc/yum.repos.d.bak/. /etc/yum.repos.d/
-    sudo rm -rf /etc/yum.repos.d.bak
+    if sudo cp -an /etc/yum.repos.d.bak/. /etc/yum.repos.d/; then
+        sudo rm -rf /etc/yum.repos.d.bak
+    else
+        echo "ERROR: Failed to restore files from /etc/yum.repos.d.bak; keeping backup for manual recovery." >&2
+        exit 1
+    fi
 fi
 
 # Enable CodeReady Builder (CRB) repo for -devel packages (e.g. libvirt-devel).
 # On RHUI instances (like AWS), subscription-manager repos --enable can't touch
 # CRB at all (registered or not) because it's managed by the static RHUI repo
 # file, not RHSM entitlements. dnf config-manager edits that file directly,
-# which is what 'crb enable' itself wraps on non-RHUI hosts.
+# which is what 'crb enable' itself wraps on non-RHUI hosts. RHEL_HOST_AMI can
+# also point at a custom, RHSM-only AMI with no RHUI repo file at all, so fall
+# back to subscription-manager for that case rather than assuming RHUI.
 enable_crb_repo() {
+    local arch
+    arch=$(uname -m)
+    local rhui_crb="codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-rhui-rpms"
+    local rhsm_crb="codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-${arch}-rpms"
+
     if command -v crb &>/dev/null; then
         sudo crb enable
+    elif sudo dnf -q repoinfo --all "${rhui_crb}" &>/dev/null; then
+        sudo dnf config-manager --set-enabled "${rhui_crb}"
     else
-        sudo dnf config-manager --set-enabled "codeready-builder-for-rhel-${RHEL_MAJOR_VERSION}-rhui-rpms"
+        sudo subscription-manager repos --enable "${rhsm_crb}"
     fi
 }
 
