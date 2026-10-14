@@ -64,7 +64,11 @@ else
             sudo rm -rf "${staging}"
             exit 1
         fi
-        sudo mv "${staging}" /etc/yum.repos.d.bak
+        if ! sudo mv "${staging}" /etc/yum.repos.d.bak; then
+            echo "ERROR: Failed to publish backup to /etc/yum.repos.d.bak. Aborting before wipe."
+            sudo rm -rf "${staging}"
+            exit 1
+        fi
         sudo rm -rf /etc/yum.repos.d/*
     fi
 
