@@ -115,10 +115,9 @@ enable_crb_repo() {
 
     if command -v crb &>/dev/null; then
         sudo crb enable
-    elif sudo dnf -q repoinfo --all "${rhui_crb}" &>/dev/null; then
-        sudo dnf config-manager --set-enabled "${rhui_crb}"
     else
-        sudo subscription-manager repos --enable "${rhsm_crb}"
+        sudo dnf config-manager --set-enabled "${rhui_crb}" \
+            || sudo subscription-manager repos --enable "${rhsm_crb}"
     fi
 }
 
